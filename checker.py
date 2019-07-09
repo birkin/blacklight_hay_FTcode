@@ -118,7 +118,7 @@ class YokenCheck:
         """ Hits url; returns browser object.
             Called by run_check() """
         aim = """\n-------\nGoal: Ensure a format of `Archives/Manuscripts` with a location of `HAY MANUSCRIPTS`
-shows the easyrequest_hay request url -- _if_ the status is `AVAILABLE`. """
+shows the direct Aeon request url -- _if_ the status is `AVAILABLE`. """
         log.info( aim )
         bib = 'b3589814'
         url = f'{settings.ROOT_PAGE_URL}/{bib}'
