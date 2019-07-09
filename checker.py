@@ -22,32 +22,18 @@ opts = Options()
 def run_checks():
     """ Manages functional-checks. """
     try:
-        check_A()                     # `David Beckwith papers`
-        yoken = YokenCheck()          # `Mel B. Yoken collection`
-        yoken.run_check()
+        # check_A()                     # `David Beckwith papers`
+        # yoken = YokenCheck()          # `Mel B. Yoken collection`
+        # yoken.run_check()
         john_hay = JohnHayCheck()     # `John Hay papers`
         john_hay.run_check()
-        gregorian = GregorianCheck()  # `Vartan Gregorian papers`
-        gregorian.run_check()
-        brown = BrownCheck()
-        brown.run_check()
+        # gregorian = GregorianCheck()  # `Vartan Gregorian papers`
+        # gregorian.run_check()
+        # brown = BrownCheck()
+        # brown.run_check()
     except Exception:
         log.exception( 'exception; traceback...' )
         # raise
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 def check_A():
@@ -237,11 +223,11 @@ class JohnHayCheck:
 
         ## third item empties test
         for class_type in [ 'scan', 'jcb_url', 'ezb_volume_url', 'annexhay_easyrequest_url' ]:
-            request_link = second_item.find_element_by_class_name( class_type )
+            request_link = third_item.find_element_by_class_name( class_type )
             assert request_link.text == '', f'request_link.text, ```{request_link.text}```'
 
         ## third item request-link test -- direct Aeon link SHOULD show
-        request_link = second_item.find_element_by_class_name( 'hay_aeon_url' )
+        request_link = third_item.find_element_by_class_name( 'hay_aeon_url' )
         assert request_link.text.strip() == 'request-access', f'request_link.text, ```{request_link.text}```'
 
         self.browser.close()
@@ -255,7 +241,7 @@ class JohnHayCheck:
         aim = """\n-------\nGoal: Ensure a bib-format of `Archives/Manuscripts` with items of varying locations
 shows the proper type of request url -- _if_ the status is `AVAILABLE`. """
         log.info( aim )
-        url = f'{settings.ROOT_PAGE_URL}/{self.bib}'
+        url = f'{settings.ROOT_PAGE_URL}/{self.bib}?limit=false'
         log.info( f'hitting url, ```{url}```' )
         #
         self.browser.get( url )
@@ -294,13 +280,13 @@ shows the proper type of request url -- _if_ the status is `AVAILABLE`. """
             Called by run_check() """
         log.info( f'third_item.text, ```{third_item.text}```' )
         location = third_item.find_element_by_class_name( 'location' )
-        assert location.text == 'ANNEX HAY', f'location.text, ```{location.text}```'
+        assert location.text == 'HAY MANUSCRIPTS', f'location.text, ```{location.text}```'
         #
         call_number = third_item.find_element_by_class_name( 'callnumber' )
-        assert call_number.text == 'Ms.HAY Box 4', f'call_number.text, ```{call_number.text}```'
+        assert call_number.text == 'Ms.HAY Box 20 - Photographs', f'call_number.text, ```{call_number.text}```'
         #
         status = third_item.find_element_by_class_name( 'status' )
-        assert status.text == 'DUE 06-22-18', f'status.text, ```{status.text}```'
+        assert status.text == 'AVAILABLE', f'status.text, ```{status.text}```'
         return ( location, call_number, status )
 
     ## end class JohnHayCheck
