@@ -78,7 +78,6 @@ class YokenCheck:
     def __init__(self):
         pass
 
-
     def run_check(self):
         """ Tests Hay `Archives/Manuscripts` `Mel B. Yoken collection` requirement. """
 
@@ -91,23 +90,24 @@ class YokenCheck:
         ## first item info
         first_item = browser.find_elements_by_class_name( 'bib_item' )[0]
         ( location, call_number, status ) = self.get_first_item_info( first_item )
-        for class_type in [ 'scan', 'jcb_url', 'hay_aeon_url', 'ezb_volume_url' ]:
+
+        ## first item test -- NO links should show
+        for class_type in [ 'scan', 'jcb_url', 'hay_aeon_url', 'ezb_volume_url', 'annexhay_easyrequest_url' ]:
             empty_link_element = first_item.find_element_by_class_name( class_type )
             assert empty_link_element.text == '', f'empty_link_element.text, ```{empty_link_element.text}```'
-
-        ## first item test -- link should NOT show
-        easyrequest_hay_url = first_item.find_element_by_class_name( 'annexhay_easyrequest_url' )
-        assert easyrequest_hay_url.text.strip() == '', f'easyrequest_hay_url.text, ```{easyrequest_hay_url.text}```'
 
         ## second item info
         second_item = browser.find_elements_by_class_name( 'bib_item' )[1]
         ( location, call_number, status ) = self.get_second_item_info( second_item )
-        for class_type in [ 'scan', 'jcb_url', 'hay_aeon_url', 'ezb_volume_url' ]:
+
+        ## second item empties test -- only hay_aeon_url should show, no others
+        for class_type in [ 'scan', 'jcb_url', 'annexhay_easyrequest_url', 'ezb_volume_url' ]:
+            # log.info( f'class_type, {class_type}' )
             empty_link_element = second_item.find_element_by_class_name( class_type )
             assert empty_link_element.text == '', f'empty_link_element.text, ```{empty_link_element.text}```'
 
-        ## second item test -- link SHOULD show
-        easyrequest_hay_url = second_item.find_element_by_class_name( 'annexhay_easyrequest_url' )
+        ## second item hay_aeon_url test -- link SHOULD show
+        easyrequest_hay_url = second_item.find_element_by_class_name( 'hay_aeon_url' )
         assert easyrequest_hay_url.text.strip() == 'request-access', f'easyrequest_hay_url.text, ```{easyrequest_hay_url.text}```'
 
         log.info( f'Result: test passed.' )  # won't get here unless all asserts pass
