@@ -1,3 +1,3 @@
 import os
 
-URL_A = os.environ['BLK_HAY__URL_A']
+ROOT_PAGE_URL = os.environ['BLK_HAY__ROOT_PAGE_URL']
