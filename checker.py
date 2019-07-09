@@ -60,23 +60,23 @@ class GregorianCheck:
         # log.info( f'first_item.text, ```{first_item.text}```' )
         ( location, call_number, status ) = self.get_first_item_info( first_item )
 
-        ## first item empties test -- only `annexhay_easyrequest_url`  should show
-        for class_type in [ 'scan', 'jcb_url', 'hay_aeon_url', 'ezb_volume_url' ]:
+        ## first item empties test -- NO link should show
+        for class_type in [ 'scan', 'jcb_url', 'hay_aeon_url', 'ezb_volume_url', 'annexhay_easyrequest_url' ]:
             request_link = first_item.find_element_by_class_name( class_type )
             assert request_link.text == '', f'request_link.text, ```{request_link.text}```'
-
-        ## first item url test -- `easyrequest_hay_url` link SHOULD show
-        request_link = first_item.find_element_by_class_name( 'annexhay_easyrequest_url' )
-        assert request_link.text.strip() == 'request-access', f'request_link.text, ```{request_link.text}```'
 
         ## second item info (due item)
         second_item = self.browser.find_element_by_id( 'item_142740287' )
         ( location, call_number, status ) = self.get_second_item_info( second_item )
 
-        ## second item empties test -- no link should show
-        for class_type in [ 'scan', 'jcb_url', 'hay_aeon_url', 'ezb_volume_url', 'annexhay_easyrequest_url' ]:
+        ## second item empties test
+        for class_type in [ 'scan', 'jcb_url', 'hay_aeon_url', 'ezb_volume_url' ]:
             request_link = second_item.find_element_by_class_name( class_type )
             assert request_link.text == '', f'request_link.text, ```{request_link.text}```'
+
+        ## second item link test -- `annexhay_easyrequest_url` link SHOULD show
+        request_link = second_item.find_element_by_class_name( 'annexhay_easyrequest_url' )
+        assert request_link.text.strip() == 'request-access', f'request_link.text, ```{request_link.text}```'
 
         self.browser.close()
         log.info( f'Result: test passed.' )  # won't get here unless all asserts pass
@@ -103,10 +103,10 @@ class GregorianCheck:
         assert location.text == 'ANNEX HAY', f'location.text, ```{location.text}```'
         #
         call_number = first_item.find_element_by_class_name( 'callnumber' )
-        assert call_number.text == 'Ms.HAY Box 1', f'call_number.text, ```{call_number.text}```'
+        assert call_number.text == 'OF-1C-16 Box 1', f'call_number.text, ```{call_number.text}```'
         #
         status = first_item.find_element_by_class_name( 'status' )
-        assert status.text == 'AVAILABLE', f'status.text, ```{status.text}```'
+        assert status.text == 'RESTRICTED', f'status.text, ```{status.text}```'
         return ( location, call_number, status )
 
     def get_second_item_info( self, second_item ):
@@ -117,25 +117,11 @@ class GregorianCheck:
         assert location.text == 'ANNEX HAY', f'location.text, ```{location.text}```'
         #
         call_number = second_item.find_element_by_class_name( 'callnumber' )
-        assert call_number.text == 'Ms.HAY Box 4', f'call_number.text, ```{call_number.text}```'
+        assert call_number.text == 'OF-1C-16 Box 4', f'call_number.text, ```{call_number.text}```'
         #
         status = second_item.find_element_by_class_name( 'status' )
-        assert status.text == 'DUE 06-22-18', f'status.text, ```{status.text}```'
+        assert status.text == 'AVAILABLE', f'status.text, ```{status.text}```'
         return ( location, call_number, status )
-
-    # def get_third_item_info( self, third_item ):
-    #     """ Parses item.
-    #         Called by run_check() """
-    #     log.info( f'third_item.text, ```{third_item.text}```' )
-    #     location = third_item.find_element_by_class_name( 'location' )
-    #     assert location.text == 'ANNEX HAY', f'location.text, ```{location.text}```'
-    #     #
-    #     call_number = third_item.find_element_by_class_name( 'callnumber' )
-    #     assert call_number.text == 'Ms.HAY Box 4', f'call_number.text, ```{call_number.text}```'
-    #     #
-    #     status = third_item.find_element_by_class_name( 'status' )
-    #     assert status.text == 'DUE 06-22-18', f'status.text, ```{status.text}```'
-    #     return ( location, call_number, status )
 
     ## end class GregorianCheck
 
