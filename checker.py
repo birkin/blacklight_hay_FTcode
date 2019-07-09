@@ -32,7 +32,7 @@ def check_A():
     """ Tests Hay `Archives/Manuscripts` requirement. """
 
     ## load page
-    aim = """  Goal: Ensure a format of `Archives/Manuscripts` with a location of `ANNEX HAY` shows the easyrequest_hay request url. """
+    aim = """\n-------\nGoal: Ensure a format of `Archives/Manuscripts` with a location of `ANNEX HAY` shows the easyrequest_hay request url. """
     log.info( aim )
     log.info( f'hitting url, ```{settings.URL_A}```' )
     #
@@ -64,12 +64,12 @@ def check_A():
     easyrequest_hay_url = first_item.find_element_by_class_name( 'annexhay_easyrequest_url' )
     assert easyrequest_hay_url.text.strip() == 'request-access', f'easyrequest_hay_url.text, ```{easyrequest_hay_url.text}```'
 
-    log.info( f'Result: All good.\n-------' )  # won't get here unless all asserts pass
+    log.info( f'Result: All good.' )  # won't get here unless all asserts pass
 
     ## end def check_A()
 
 
 run_checks()
 browser.close()
-log.info( 'all checks complete' )
+log.info( '\n-------\nAll checks complete' )
 
