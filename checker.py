@@ -22,11 +22,11 @@ opts = Options()
 def run_checks():
     """ Manages functional-checks. """
     try:
-        check_A()                  # `David Beckwith papers`
-        yoken = YokenCheck()       # `Mel B. Yoken collection`
-        yoken.run_check()
-        # john_hay = JohnHayCheck()  # `John Hay papers`
-        # john_hay.run_check()
+        # check_A()                  # `David Beckwith papers`
+        # yoken = YokenCheck()       # `Mel B. Yoken collection`
+        # yoken.run_check()
+        john_hay = JohnHayCheck()  # `John Hay papers`
+        john_hay.run_check()
     except Exception:
         log.exception( 'exception; traceback...' )
         # raise
@@ -37,7 +37,7 @@ def run_checks():
 class JohnHayCheck:
 
     def __init__(self):
-        pass
+        self.browser = Firefox(options=opts)
 
     def run_check(self):
         """ Tests Hay `Archives/Manuscripts` `John Hay papers` requirement.
@@ -47,14 +47,14 @@ class JohnHayCheck:
             - hay-manuscript item, `item_184781917`
             """
 
-        browser = self.load_page()
+        self.load_page()
 
         ## format
-        format_element = browser.find_elements_by_class_name( 'blacklight-format' )[1]  # [0] is the word 'Format'
+        format_element = self.browser.find_elements_by_class_name( 'blacklight-format' )[1]  # [0] is the word 'Format'
         assert format_element.text == 'Archives/Manuscripts', f'format_element.text, ```{format_element.text}```'
 
-        ## first item info
-        first_item = browser.find_element_by_id( 'item_18327071x' )
+        ## first item info (annex-hay item available item)
+        first_item = self.browser.find_element_by_id( 'item_18327071x' )
         # log.info( f'first_item.text, ```{first_item.text}```' )
         ( location, call_number, status ) = self.get_first_item_info( first_item )
 
@@ -64,15 +64,18 @@ class JohnHayCheck:
             assert empty_link_element.text == '', f'empty_link_element.text, ```{empty_link_element.text}```'
 
         ## first item url test -- `easyrequest_hay_url` link SHOULD show
-        request_link = first_item.find_element_by_class_name( 'easyrequest_hay_url' )
+        request_link = first_item.find_element_by_class_name( 'annexhay_easyrequest_url' )
         assert request_link.text.strip() == 'request-access', f'request_link.text, ```{request_link.text}```'
+
+        ## second item info (due item)
+        second_item = browser.find_elements_by_class_name( 'bib_item' )[1]
+        ( location, call_number, status ) = self.get_second_item_info( second_item )
+
+
 
         1/0
 
 
-        ## second item info
-        second_item = browser.find_elements_by_class_name( 'bib_item' )[1]
-        ( location, call_number, status ) = self.get_second_item_info( second_item )
 
         ## second item empties test -- only hay_aeon_url should show, no others
         for class_type in [ 'scan', 'jcb_url', 'annexhay_easyrequest_url', 'ezb_volume_url' ]:
@@ -84,6 +87,7 @@ class JohnHayCheck:
         easyrequest_hay_url = second_item.find_element_by_class_name( 'hay_aeon_url' )
         assert easyrequest_hay_url.text.strip() == 'request-access', f'easyrequest_hay_url.text, ```{easyrequest_hay_url.text}```'
 
+        self.browser.close()
         log.info( f'Result: test passed.' )  # won't get here unless all asserts pass
 
         ## end def run_check()
@@ -98,8 +102,8 @@ shows the proper type of request url -- _if_ the status is `AVAILABLE`. """
         url = f'{settings.ROOT_PAGE_URL}/{bib}'
         log.info( f'hitting url, ```{url}```' )
         #
-        browser.get( url )
-        return browser
+        self.browser.get( url )
+        return
 
     def get_first_item_info( self, first_item ):
         """ Parses item.
