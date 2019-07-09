@@ -22,8 +22,8 @@ browser = Firefox(options=opts)
 def run_checks():
     """ Manages functional-checks. """
     try:
-        check_A()  # `David Beckwith papers`
-        yoken = YokenCheck()
+        check_A()             # `David Beckwith papers`
+        yoken = YokenCheck()  # `Mel B. Yoken collection`
         yoken.run_check()
     except Exception:
         log.exception( 'exception; traceback...' )
