@@ -60,32 +60,31 @@ class JohnHayCheck:
 
         ## first item empties test -- only `annexhay_easyrequest_url`  should show
         for class_type in [ 'scan', 'jcb_url', 'hay_aeon_url', 'ezb_volume_url' ]:
-            empty_link_element = first_item.find_element_by_class_name( class_type )
-            assert empty_link_element.text == '', f'empty_link_element.text, ```{empty_link_element.text}```'
+            request_link = first_item.find_element_by_class_name( class_type )
+            assert request_link.text == '', f'request_link.text, ```{request_link.text}```'
 
         ## first item url test -- `easyrequest_hay_url` link SHOULD show
         request_link = first_item.find_element_by_class_name( 'annexhay_easyrequest_url' )
         assert request_link.text.strip() == 'request-access', f'request_link.text, ```{request_link.text}```'
 
         ## second item info (due item)
-        second_item = browser.find_elements_by_class_name( 'bib_item' )[1]
+        second_item = self.browser.find_element_by_id( 'item_183270745' )
         ( location, call_number, status ) = self.get_second_item_info( second_item )
 
+        ## second item empties test -- no link should show
+        for class_type in [ 'scan', 'jcb_url', 'hay_aeon_url', 'ezb_volume_url', 'annexhay_easyrequest_url' ]:
+            request_link = second_item.find_element_by_class_name( class_type )
+            assert request_link.text == '', f'request_link.text, ```{request_link.text}```'
 
 
-        1/0
+
+
+        # ## third item info (hay manuscript item)
+        # third_item = self.browser.find_element_by_id( 'item_184781917' )
+        # ( location, call_number, status ) = self.get_third_item_info( third_item )
 
 
 
-        ## second item empties test -- only hay_aeon_url should show, no others
-        for class_type in [ 'scan', 'jcb_url', 'annexhay_easyrequest_url', 'ezb_volume_url' ]:
-            # log.info( f'class_type, {class_type}' )
-            empty_link_element = second_item.find_element_by_class_name( class_type )
-            assert empty_link_element.text == '', f'empty_link_element.text, ```{empty_link_element.text}```'
-
-        ## second item hay_aeon_url test -- link SHOULD show
-        easyrequest_hay_url = second_item.find_element_by_class_name( 'hay_aeon_url' )
-        assert easyrequest_hay_url.text.strip() == 'request-access', f'easyrequest_hay_url.text, ```{easyrequest_hay_url.text}```'
 
         self.browser.close()
         log.info( f'Result: test passed.' )  # won't get here unless all asserts pass
@@ -124,13 +123,13 @@ shows the proper type of request url -- _if_ the status is `AVAILABLE`. """
             Called by run_check() """
         log.info( f'second_item.text, ```{second_item.text}```' )
         location = second_item.find_element_by_class_name( 'location' )
-        assert location.text == 'HAY MANUSCRIPTS', f'location.text, ```{location.text}```'
+        assert location.text == 'ANNEX HAY', f'location.text, ```{location.text}```'
         #
         call_number = second_item.find_element_by_class_name( 'callnumber' )
-        assert call_number.text == 'Ms.2011.038 Box 1', f'call_number.text, ```{call_number.text}```'
+        assert call_number.text == 'Ms.HAY Box 4', f'call_number.text, ```{call_number.text}```'
         #
         status = second_item.find_element_by_class_name( 'status' )
-        assert status.text == 'AVAILABLE', f'status.text, ```{status.text}```'
+        assert status.text == 'DUE 06-22-18', f'status.text, ```{status.text}```'
         return ( location, call_number, status )
 
     ## end class JohnHayCheck
@@ -170,7 +169,7 @@ def check_A():
     status = first_item.find_element_by_class_name( 'status' )
     assert status.text == 'AVAILABLE', f'status.text, ```{status.text}```'
 
-    ## empties
+    ## empties test
     for class_type in [ 'scan', 'jcb_url', 'hay_aeon_url', 'ezb_volume_url' ]:
         empty_link_element = first_item.find_element_by_class_name( class_type )
         assert empty_link_element.text == '', f'empty_link_element.text, ```{empty_link_element.text}```'
