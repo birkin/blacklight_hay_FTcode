@@ -22,15 +22,15 @@ opts = Options()
 def run_checks():
     """ Manages functional-checks. """
     try:
-        # check_A()                     # `David Beckwith papers`
-        # yoken = YokenCheck()          # `Mel B. Yoken collection`
-        # yoken.run_check()
+        check_A()                     # `David Beckwith papers`
+        yoken = YokenCheck()          # `Mel B. Yoken collection`
+        yoken.run_check()
         john_hay = JohnHayCheck()     # `John Hay papers`
         john_hay.run_check()
-        # gregorian = GregorianCheck()  # `Vartan Gregorian papers`
-        # gregorian.run_check()
-        # brown = BrownCheck()
-        # brown.run_check()
+        gregorian = GregorianCheck()  # `Vartan Gregorian papers`
+        gregorian.run_check()
+        brown = BrownCheck()
+        brown.run_check()
     except Exception:
         log.exception( 'exception; traceback...' )
         # raise
