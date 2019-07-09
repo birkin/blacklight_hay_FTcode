@@ -22,16 +22,119 @@ opts = Options()
 def run_checks():
     """ Manages functional-checks. """
     try:
-        check_A()                     # `David Beckwith papers`
-        yoken = YokenCheck()          # `Mel B. Yoken collection`
-        yoken.run_check()
-        john_hay = JohnHayCheck()     # `John Hay papers`
-        john_hay.run_check()
-        gregorian = GregorianCheck()  # `Vartan Gregorian papers`
-        gregorian.run_check()
+        # check_A()                     # `David Beckwith papers`
+        # yoken = YokenCheck()          # `Mel B. Yoken collection`
+        # yoken.run_check()
+        # john_hay = JohnHayCheck()     # `John Hay papers`
+        # john_hay.run_check()
+        # gregorian = GregorianCheck()  # `Vartan Gregorian papers`
+        # gregorian.run_check()
+        brown = BrownCheck()
+        brown.run_check()
     except Exception:
         log.exception( 'exception; traceback...' )
         # raise
+
+
+
+
+
+
+
+
+
+
+class BrownCheck:
+
+    def __init__(self):
+        self.browser = Firefox(options=opts)
+
+    def run_check(self):
+        """ Tests Hay `Archives/Manuscripts` `John Nicholas Brown II papers` requirement.
+            For reference:
+            - annex-hay RESTRICTED-via-callnumber item, `item_184782697`
+            - annex-hay non-restricted item, `item_140852803`
+            """
+
+        self.load_page()
+
+        ## format
+        format_element = self.browser.find_elements_by_class_name( 'blacklight-format' )[1]  # [0] is the word 'Format'
+        assert format_element.text == 'Archives/Manuscripts', f'format_element.text, ```{format_element.text}```'
+
+        ## first item info (annex-hay item available, but restricted-via-callnumber item)
+        first_item = self.browser.find_element_by_id( 'item_184782697' )
+        # log.info( f'first_item.text, ```{first_item.text}```' )
+        ( location, call_number, status ) = self.get_first_item_info( first_item )
+
+        ## first item empties test -- NO link should show
+        for class_type in [ 'scan', 'jcb_url', 'hay_aeon_url', 'ezb_volume_url', 'annexhay_easyrequest_url' ]:
+            request_link = first_item.find_element_by_class_name( class_type )
+            assert request_link.text == '', f'request_link.text, ```{request_link.text}```'
+
+        ## second item info (regular annex-hay available item)
+        second_item = self.browser.find_element_by_id( 'item_140852803' )
+        ( location, call_number, status ) = self.get_second_item_info( second_item )
+
+        ## second item empties test
+        for class_type in [ 'scan', 'jcb_url', 'hay_aeon_url', 'ezb_volume_url' ]:
+            request_link = second_item.find_element_by_class_name( class_type )
+            assert request_link.text == '', f'request_link.text, ```{request_link.text}```'
+
+        ## second item link test -- `annexhay_easyrequest_url` link SHOULD show
+        request_link = second_item.find_element_by_class_name( 'annexhay_easyrequest_url' )
+        assert request_link.text.strip() == 'request-access', f'request_link.text, ```{request_link.text}```'
+
+        self.browser.close()
+        log.info( f'Result: test passed.' )  # won't get here unless all asserts pass
+
+        ## end def run_check()
+
+    def load_page( self ):
+        """ Hits url; returns browser object.
+            Called by run_check() """
+        aim = """\n-------\nGoal: Ensure a bib-format of `Archives/Manuscripts` -- with items that are `RESTRICTED` via callnumber -- cannot be requested. """
+        log.info( aim )
+        bib = 'b3969016'
+        url = f'{settings.ROOT_PAGE_URL}/{bib}?limit=false'
+        log.info( f'hitting url, ```{url}```' )
+        #
+        self.browser.get( url )
+        return
+
+    def get_first_item_info( self, first_item ):
+        """ Parses item.
+            Called by run_check() """
+        log.info( f'first_item.text, ```{first_item.text}```' )
+        location = first_item.find_element_by_class_name( 'location' )
+        assert location.text == 'ANNEX HAY', f'location.text, ```{location.text}```'
+        #
+        call_number = first_item.find_element_by_class_name( 'callnumber' )
+        assert call_number.text == 'Ms.2007.012 Box 142 - RESTRICTED', f'call_number.text, ```{call_number.text}```'
+        #
+        status = first_item.find_element_by_class_name( 'status' )
+        assert status.text == 'AVAILABLE', f'status.text, ```{status.text}```'
+        return ( location, call_number, status )
+
+    def get_second_item_info( self, second_item ):
+        """ Parses item.
+            Called by run_check() """
+        log.info( f'second_item.text, ```{second_item.text}```' )
+        location = second_item.find_element_by_class_name( 'location' )
+        assert location.text == 'ANNEX HAY', f'location.text, ```{location.text}```'
+        #
+        call_number = second_item.find_element_by_class_name( 'callnumber' )
+        assert call_number.text == 'OF-1C-16 Box 4', f'call_number.text, ```{call_number.text}```'
+        #
+        status = second_item.find_element_by_class_name( 'status' )
+        assert status.text == 'AVAILABLE', f'status.text, ```{status.text}```'
+        return ( location, call_number, status )
+
+    ## end class BrownCheck
+
+
+
+
 
 
 def check_A():
