@@ -87,7 +87,8 @@ class BeckwithResultsCheck:
         log.info( f'hitting url, ```{url}```' )
         #
         self.browser.get( url )
-        time.sleep( 1 )  # lets js load up page
+        self.browser.implicitly_wait(2)
+        # time.sleep( 1 )  # lets js load up page
         return
 
     def get_item( self, target_callnumber ):
@@ -161,6 +162,7 @@ class YokenResultsCheck:
         url = f'{settings.ROOT_PAGE_URL}?{self.query}'
         log.info( f'hitting url, ```{url}```' )
         self.browser.get( url )
+        self.browser.implicitly_wait(2)
         return
 
     def get_first_item( self ):
@@ -190,9 +192,6 @@ class YokenResultsCheck:
         return ( location, call_number, status )
 
     ## end class YokenCheck
-
-
-
 
 
 class JohnHayResultsCheck:
@@ -253,12 +252,18 @@ class JohnHayResultsCheck:
 
         ## third item link-check
         assert 'request-access' not in status.text, f'status.text, ```{status.text}```'
-        # link = status.find_element_by_tag_name( 'a' )
-        # assert 'foo-brown.aeon.atlas-sys.com' in link.get_attribute('href'), link.get_attribute('href')
 
+        ## fourth item (hay-john-hay, no)
+        fourth_item_row = self.get_item( self.fourth_item_target_callnumber )
+        ( location, call_number, status ) = self.get_item_info( fourth_item_row )
 
-        1/0
+        ## fourth item data checks
+        assert location.text == 'HAY JOHN-HAY', f'location.text, ```{location.text}```'
+        assert call_number.text == self.fourth_item_target_callnumber, f'call_number.text, ```{call_number.text}```'
+        assert 'USE IN LIBRARY' in status.text, f'status.text, ```{status.text}```'  # request-access link will also be here (odd but true)
 
+        ## fourth item link-check
+        assert 'request-access' not in status.text, f'status.text, ```{status.text}```'
 
         self.browser.close()
         log.info( f'Result: test passed.' )  # won't get here unless all asserts pass
@@ -275,7 +280,8 @@ class JohnHayResultsCheck:
         log.info( f'hitting url, ```{url}```' )
         #
         self.browser.get( url )
-        time.sleep( 1.66 )  # lets js load up page
+        self.browser.implicitly_wait(2)
+        # time.sleep( 1.66 )  # lets js load up page
         return
 
     def get_item( self, target_callnumber ):
@@ -316,67 +322,63 @@ class JohnHayResultsCheck:
 
 
 
-class JohnHayCheck:
+class GregorianResultsCheck:
 
     def __init__(self):
         self.browser = Firefox(options=opts)
-        self.bib = 'b2498067'
-        self.blast_limits()
+        self.query = 'f[format][]=Archives/Manuscripts&q=Vartan Gregorian papers'
+        self.first_item_target_callnumber = 'OF-1C-16 Box 2'  # annex-hay, restricted, no
+        self.second_item_target_callnumber = 'OF-1C-16 Box 5'  # annex-hay, available, yes
+        self.third_item_target_callnumber = 'OF-1ZSE-1'  # hay-archives, use-in-library, yes
+        # self.blast_limits()
 
-    def blast_limits(self):
-        """ Warms availability cache to work around localhost and dblightcit lack of 'more' functionality. """
-        url = f'{settings.PRODUCTION_ROOT_PAGE_URL}/{self.bib}?limit=false'
-        self.browser.get( url )
+    # def blast_limits(self):
+    #     """ Warms availability cache to work around localhost and dblightcit lack of 'more' functionality. """
+    #     url = f'{settings.PRODUCTION_ROOT_PAGE_URL}?{self.query}'
+    #     self.browser.get( url )
 
     def run_check(self):
-        """ Tests Hay `Archives/Manuscripts` `John Hay papers` requirement.
-            For reference:
-            - annex-hay item, `item_18327071x`
-            - 'due' item, `item_183270745`
-            - hay-manuscript item, `item_184781917`
-            """
+        """ Checks permutations of `Archives/Manuscripts` `john hay papers` search results. """
 
         self.load_page()
 
-        ## format
-        format_element = self.browser.find_elements_by_class_name( 'blacklight-format' )[1]  # [0] is the word 'Format'
-        assert format_element.text == 'Archives/Manuscripts', f'format_element.text, ```{format_element.text}```'
+        ## first item (annex-hay item available)
+        first_item_row = self.get_item( self.first_item_target_callnumber )
+        ( location, call_number, status ) = self.get_item_info( first_item_row )
 
-        ## first item info (annex-hay item available item)
-        first_item = self.browser.find_element_by_id( 'item_18327071x' )
-        # log.info( f'first_item.text, ```{first_item.text}```' )
-        ( location, call_number, status ) = self.get_first_item_info( first_item )
+        ## first item data checks
+        assert location.text == 'foo-ANNEX HAY', f'location.text, ```{location.text}```'
+        assert call_number.text == self.first_item_target_callnumber, f'call_number.text, ```{call_number.text}```'
+        assert 'foo-AVAILABLE' in status.text, f'status.text, ```{status.text}```'  # request-access link will also be here (odd but true)
 
-        ## first item empties test -- only `annexhay_easyrequest_url`  should show
-        for class_type in [ 'scan', 'jcb_url', 'hay_aeon_url', 'ezb_volume_url' ]:
-            request_link = first_item.find_element_by_class_name( class_type )
-            assert request_link.text == '', f'request_link.text, ```{request_link.text}```'
+        ## first item link-check
+        assert 'foo-request-access' in status.text, f'status.text, ```{status.text}```'
+        link = status.find_element_by_tag_name( 'a' )
+        assert 'foo-easyrequest_hay/confirm' in link.get_attribute('href'), link.get_attribute('href')
 
-        ## first item url test -- `easyrequest_hay_url` link SHOULD show
-        request_link = first_item.find_element_by_class_name( 'annexhay_easyrequest_url' )
-        assert request_link.text.strip() == 'request-access', f'request_link.text, ```{request_link.text}```'
+        ## second item (annex-hay, due, no)
+        second_item_row = self.get_item( self.second_item_target_callnumber )
+        ( location, call_number, status ) = self.get_item_info( second_item_row )
 
-        ## second item info (due item)
-        second_item = self.browser.find_element_by_id( 'item_183270745' )
-        ( location, call_number, status ) = self.get_second_item_info( second_item )
+        ## second item data checks
+        assert location.text == 'foo-ANNEX HAY', f'location.text, ```{location.text}```'
+        assert call_number.text == self.second_item_target_callnumber, f'call_number.text, ```{call_number.text}```'
+        assert 'foo-DUE 06-22-18' in status.text, f'status.text, ```{status.text}```'  # request-access link will also be here (odd but true)
 
-        ## second item empties test -- no link should show
-        for class_type in [ 'scan', 'jcb_url', 'hay_aeon_url', 'ezb_volume_url', 'annexhay_easyrequest_url' ]:
-            request_link = second_item.find_element_by_class_name( class_type )
-            assert request_link.text == '', f'request_link.text, ```{request_link.text}```'
+        ## second item link-check
+        assert 'foo-request-access' not in status.text, f'status.text, ```{status.text}```'
 
-        ## third item info (hay manuscript item)
-        third_item = self.browser.find_element_by_id( 'item_184781917' )
-        ( location, call_number, status ) = self.get_third_item_info( third_item )
+        ## third item (hay-microfilm, no)
+        third_item_row = self.get_item( self.third_item_target_callnumber )
+        ( location, call_number, status ) = self.get_item_info( third_item_row )
 
-        ## third item empties test
-        for class_type in [ 'scan', 'jcb_url', 'ezb_volume_url', 'annexhay_easyrequest_url' ]:
-            request_link = third_item.find_element_by_class_name( class_type )
-            assert request_link.text == '', f'request_link.text, ```{request_link.text}```'
+        ## third item data checks
+        assert location.text == 'foo-HAY MICROFLM', f'location.text, ```{location.text}```'
+        assert call_number.text == self.third_item_target_callnumber, f'call_number.text, ```{call_number.text}```'
+        assert 'foo-USE IN LIBRARY' in status.text, f'status.text, ```{status.text}```'  # request-access link will also be here (odd but true)
 
-        ## third item request-link test -- direct Aeon link SHOULD show
-        request_link = third_item.find_element_by_class_name( 'hay_aeon_url' )
-        assert request_link.text.strip() == 'request-access', f'request_link.text, ```{request_link.text}```'
+        ## third item link-check
+        assert 'foo-request-access' not in status.text, f'status.text, ```{status.text}```'
 
         self.browser.close()
         log.info( f'Result: test passed.' )  # won't get here unless all asserts pass
@@ -386,58 +388,53 @@ class JohnHayCheck:
     def load_page( self ):
         """ Hits url; returns browser object.
             Called by run_check() """
-        aim = """\n-------\nGoal: Ensure a bib-format of `Archives/Manuscripts` with items of varying locations
-shows the proper type of request url -- _if_ the status is `AVAILABLE`. """
+        aim = """\n-------\nGoal: `ANNEX HAY` location items with status `AVAILABLE` will have an easyrequest-hay link,
+      & `HAY MANUSCRIPTS` location items with status `USE IN LIBRARY` will have an Aeon link. """
         log.info( aim )
-        url = f'{settings.ROOT_PAGE_URL}/{self.bib}?limit=false'
+        url = f'{settings.ROOT_PAGE_URL}?{self.query}'
         log.info( f'hitting url, ```{url}```' )
         #
         self.browser.get( url )
+        self.browser.implicitly_wait(2)
+        # time.sleep( 1.66 )  # lets js load up page
         return
 
-    def get_first_item_info( self, first_item ):
+    def get_item( self, target_callnumber ):
+        """ Grabs bibs, finds correct row and returns it.
+            Called by run_check() """
+        # log.info( f'target_callnumber, ```{target_callnumber}```' )
+        bibs = self.browser.find_elements_by_css_selector( 'div.document' )
+        assert len(bibs) == 10, len(bibs)
+        target_row = 'init'
+        for bib in bibs:
+            rows = bib.find_elements_by_tag_name( 'tr' )
+            for row in rows:
+                # log.info( f'row.text, ```{row.text}```' )
+                if target_callnumber in row.text:
+                    target_row = row
+                    log.debug( f'target_row found, ```{target_row.text}```' )
+                    break
+            if target_row != 'init':
+                check_format( bib )
+                break
+        log.info( f'target_row.text, ```{target_row.text}```' )
+        assert target_callnumber in target_row.text
+        return target_row
+
+    def get_item_info( self, first_row ):
         """ Parses item.
             Called by run_check() """
-        log.info( f'first_item.text, ```{first_item.text}```' )
-        location = first_item.find_element_by_class_name( 'location' )
-        assert location.text == 'ANNEX HAY', f'location.text, ```{location.text}```'
-        #
-        call_number = first_item.find_element_by_class_name( 'callnumber' )
-        assert call_number.text == 'Ms.HAY Box 1', f'call_number.text, ```{call_number.text}```'
-        #
-        status = first_item.find_element_by_class_name( 'status' )
-        assert status.text == 'AVAILABLE', f'status.text, ```{status.text}```'
+        cells = first_row.find_elements_by_tag_name( 'td' )
+        location = cells[0]
+        call_number = cells[1]
+        status = cells[2]
         return ( location, call_number, status )
 
-    def get_second_item_info( self, second_item ):
-        """ Parses item.
-            Called by run_check() """
-        log.info( f'second_item.text, ```{second_item.text}```' )
-        location = second_item.find_element_by_class_name( 'location' )
-        assert location.text == 'ANNEX HAY', f'location.text, ```{location.text}```'
-        #
-        call_number = second_item.find_element_by_class_name( 'callnumber' )
-        assert call_number.text == 'Ms.HAY Box 4', f'call_number.text, ```{call_number.text}```'
-        #
-        status = second_item.find_element_by_class_name( 'status' )
-        assert status.text == 'DUE 06-22-18', f'status.text, ```{status.text}```'
-        return ( location, call_number, status )
+    ## end class GregorianResultsCheck
 
-    def get_third_item_info( self, third_item ):
-        """ Parses item.
-            Called by run_check() """
-        log.info( f'third_item.text, ```{third_item.text}```' )
-        location = third_item.find_element_by_class_name( 'location' )
-        assert location.text == 'HAY MANUSCRIPTS', f'location.text, ```{location.text}```'
-        #
-        call_number = third_item.find_element_by_class_name( 'callnumber' )
-        assert call_number.text == 'Ms.HAY Box 20 - Photographs', f'call_number.text, ```{call_number.text}```'
-        #
-        status = third_item.find_element_by_class_name( 'status' )
-        assert status.text == 'AVAILABLE', f'status.text, ```{status.text}```'
-        return ( location, call_number, status )
 
-    ## end class JohnHayCheck
+
+
 
 
 class GregorianCheck:
