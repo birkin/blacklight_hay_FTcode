@@ -17,6 +17,14 @@ opts = Options()
 # assert opts.headless  # Operating in headless mode
 
 
+def check_format( bib ):
+    """ Checks format.
+        Called by bib item-getters. """
+    format = bib.find_elements_by_class_name( 'title-subheading' )[-1]  # initial non-format line may exist
+    assert format.text == 'Archives/Manuscripts', f'format.text, `{format.text}`'
+    return
+
+
 class BeckwithResultsCheck:
 
     def __init__(self):
@@ -32,11 +40,7 @@ class BeckwithResultsCheck:
     #     self.browser.get( url )
 
     def run_check(self):
-        """ Tests permutations of `Archives/Manuscripts` `beckwith` search results.
-            For reference:
-            - annex-hay RESTRICTED-via-callnumber item, `item_184782697`
-            - annex-hay non-restricted item, `item_140852803`
-            """
+        """ Tests permutations of `Archives/Manuscripts` `beckwith` search results. """
 
         self.load_page()
 
@@ -54,7 +58,7 @@ class BeckwithResultsCheck:
         link = status.find_element_by_tag_name( 'a' )
         assert 'easyrequest_hay/confirm' in link.get_attribute('href'), link.get_attribute('href')
 
-        ## second item
+        ## TODO: second item?
 
         self.browser.close()
         log.info( f'Result: test passed.' )  # won't get here unless all asserts pass
@@ -80,7 +84,7 @@ class BeckwithResultsCheck:
         bibs = self.browser.find_elements_by_css_selector( 'div.document' )
         assert len(bibs) == 3, len(bibs)
         first_bib = bibs[0]
-        self.check_format( first_bib )
+        check_format( first_bib )
         rows = first_bib.find_elements_by_tag_name( 'tr' )
         target_row = 'init'
         for row in rows:
@@ -91,12 +95,12 @@ class BeckwithResultsCheck:
         assert self.first_item_target_callnumber in target_row.text
         return target_row
 
-    def check_format( self, bib ):
-        """ Checks format.
-            Called by each item-getter. """
-        format = bib.find_elements_by_class_name( 'title-subheading' )[-1]  # initial non-format line may exist
-        assert format.text == 'Archives/Manuscripts', f'format.text, `{format.text}`'
-        return
+    # def check_format( self, bib ):
+    #     """ Checks format.
+    #         Called by each item-getter. """
+    #     format = bib.find_elements_by_class_name( 'title-subheading' )[-1]  # initial non-format line may exist
+    #     assert format.text == 'Archives/Manuscripts', f'format.text, `{format.text}`'
+    #     return
 
     def get_first_item_info( self, first_row ):
         """ Parses item.
@@ -124,42 +128,33 @@ class BeckwithResultsCheck:
     ## end class BeckwithResultsCheck
 
 
-class YokenCheck:
+class YokenResultsCheck:
 
     def __init__(self):
         self.browser = Firefox(options=opts)
+        self.query = 'f[format][]=Archives/Manuscripts&q=yoken'
+        self.first_item_target_callnumber = 'Ms.2010.010 Box 2'
 
     def run_check(self):
-        """ Tests Hay `Archives/Manuscripts` `Mel B. Yoken collection` requirement. """
+        """ Tests `Archives/Manuscripts` `yoken` search results. """
 
         self.load_page()
 
-        ## format
-        format_element = self.browser.find_elements_by_class_name( 'blacklight-format' )[1]  # [0] is the word 'Format'
-        assert format_element.text == 'Archives/Manuscripts', f'format_element.text, ```{format_element.text}```'
+        ## first item info (annex-hay item available)
+        first_row = self.get_first_item()
+        ( location, call_number, status ) = self.get_first_item_info( first_row )
 
-        ## first item info
-        first_item = self.browser.find_elements_by_class_name( 'bib_item' )[0]
-        ( location, call_number, status ) = self.get_first_item_info( first_item )
+        ## first item data checks
+        assert location.text == 'ANNEX HAY', f'location.text, ```{location.text}```'
+        assert call_number.text == 'Ms.2010.010 Box 2', f'call_number.text, ```{call_number.text}```'
+        assert 'AVAILABLE' in status.text, f'status.text, ```{status.text}```'  # request-access link will also be here (odd but true)
 
-        ## first item test -- NO links should show
-        for class_type in [ 'scan', 'jcb_url', 'hay_aeon_url', 'ezb_volume_url', 'annexhay_easyrequest_url' ]:
-            request_link = first_item.find_element_by_class_name( class_type )
-            assert request_link.text == '', f'request_link.text, ```{request_link.text}```'
+        ## first item link-check
+        assert 'request-access' in status.text, f'status.text, ```{status.text}```'
+        link = status.find_element_by_tag_name( 'a' )
+        assert 'easyrequest_hay/confirm' in link.get_attribute('href'), link.get_attribute('href')
 
-        ## second item info
-        second_item = self.browser.find_elements_by_class_name( 'bib_item' )[1]
-        ( location, call_number, status ) = self.get_second_item_info( second_item )
-
-        ## second item empties test -- only hay_aeon_url should show, no others
-        for class_type in [ 'scan', 'jcb_url', 'annexhay_easyrequest_url', 'ezb_volume_url' ]:
-            # log.info( f'class_type, {class_type}' )
-            request_link = second_item.find_element_by_class_name( class_type )
-            assert request_link.text == '', f'request_link.text, ```{request_link.text}```'
-
-        ## second item hay_aeon_url test -- link SHOULD show
-        request_link = second_item.find_element_by_class_name( 'hay_aeon_url' )
-        assert request_link.text.strip() == 'request-access', f'request_link.text, ```{request_link.text}```'
+        ## TODO: second item?
 
         self.browser.close()
         log.info( f'Result: test passed.' )  # won't get here unless all asserts pass
@@ -169,15 +164,29 @@ class YokenCheck:
     def load_page( self ):
         """ Hits url; returns browser object.
             Called by run_check() """
-        aim = """\n-------\nGoal: Ensure a format of `Archives/Manuscripts` with a location of `HAY MANUSCRIPTS`
-shows the direct Aeon request url -- _if_ the status is `AVAILABLE`. """
+        aim = """\n-------\nGoal: `HAY MANUSCRIPTS` location items with status `AVAILABLE` will have an Aeon link. """
         log.info( aim )
-        bib = 'b3589814'
-        url = f'{settings.ROOT_PAGE_URL}/{bib}'
+        url = f'{settings.ROOT_PAGE_URL}?{self.query}'
         log.info( f'hitting url, ```{url}```' )
-        #
         self.browser.get( url )
         return
+
+    def get_first_item( self ):
+        """ Grabs bibs, finds second row in first bib.
+            Called by run_check() """
+        bibs = self.browser.find_elements_by_css_selector( 'div.document' )
+        assert len(bibs) == 1, len(bibs)
+        first_bib = bibs[0]
+        self.check_format( first_bib )
+        rows = first_bib.find_elements_by_tag_name( 'tr' )
+        target_row = 'init'
+        for row in rows:
+            if self.first_item_target_callnumber in row.text:
+                target_row = row
+                break
+        log.info( f'target_row.text, ```{target_row.text}```' )
+        assert self.first_item_target_callnumber in target_row.text
+        return target_row
 
     def get_first_item_info( self, first_item ):
         """ Parses item.
@@ -208,6 +217,13 @@ shows the direct Aeon request url -- _if_ the status is `AVAILABLE`. """
         return ( location, call_number, status )
 
     ## end class YokenCheck
+
+
+
+
+
+
+
 
 
 class JohnHayCheck:

@@ -10,7 +10,7 @@ import logging, pprint, sys, traceback
 import settings
 from lib import page_checks
 from lib.page_checks import YokenCheck, JohnHayCheck, GregorianCheck, BrownCheck
-from lib.results_checks import BeckwithResultsCheck
+from lib.results_checks import BeckwithResultsCheck, YokenResultsCheck
 
 
 logging.basicConfig(
@@ -41,7 +41,7 @@ def run_results_checks():
     try:
         beckwith = BeckwithResultsCheck()    # `David Beckwith papers`
         beckwith.run_check()
-        # yoken = YokenCheck()          # `Mel B. Yoken collection`
+        # yoken = YokenResultsCheck()          # `Mel B. Yoken collection`
         # yoken.run_check()
         # john_hay = JohnHayCheck()     # `John Hay papers`
         # john_hay.run_check()
