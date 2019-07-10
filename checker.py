@@ -10,7 +10,7 @@ import logging, pprint, sys, traceback
 import settings
 from lib import page_checks
 from lib.page_checks import YokenCheck, JohnHayCheck, GregorianCheck, BrownCheck
-from lib.results_checks import BeckwithResultsCheck, YokenResultsCheck
+from lib.results_checks import BeckwithResultsCheck, YokenResultsCheck, JohnHayResultsCheck
 
 
 logging.basicConfig(
@@ -39,12 +39,12 @@ def run_page_checks():
 def run_results_checks():
     """ Manages functional-checks for bib-pages. """
     try:
-        beckwith = BeckwithResultsCheck()    # `David Beckwith papers`
-        beckwith.run_check()
-        yoken = YokenResultsCheck()          # `Mel B. Yoken collection`
-        yoken.run_check()
-        # john_hay = JohnHayCheck()     # `John Hay papers`
-        # john_hay.run_check()
+        # beckwith = BeckwithResultsCheck()    # `David Beckwith papers`
+        # beckwith.run_check()
+        # yoken = YokenResultsCheck()          # `Mel B. Yoken collection`
+        # yoken.run_check()
+        john_hay = JohnHayResultsCheck()     # `John Hay papers`
+        john_hay.run_check()
         # gregorian = GregorianCheck()  # `Vartan Gregorian papers`
         # gregorian.run_check()
         # brown = BrownCheck()          # `John Nicholas Brown II papers`
