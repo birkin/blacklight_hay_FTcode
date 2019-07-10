@@ -42,7 +42,7 @@ Goal: Ensure a format of `Archives/Manuscripts` with a location of `ANNEX HAY` s
 
     ## main item info
     first_item = browser.find_elements_by_class_name( 'bib_item' )[0]
-    # print( f'first_item.text, ```{first_item.text}```' )
+    log.info( f'first_item.text, ```{first_item.text}```' )
     location = first_item.find_element_by_class_name( 'location' )
     assert location.text == 'ANNEX HAY', f'location.text, ```{location.text}```'
     #
