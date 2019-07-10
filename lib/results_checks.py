@@ -342,43 +342,47 @@ class GregorianResultsCheck:
 
         self.load_page()
 
-        ## first item (annex-hay item available)
+        ## first item (annex-hay, restricted, no)
         first_item_row = self.get_item( self.first_item_target_callnumber )
         ( location, call_number, status ) = self.get_item_info( first_item_row )
 
         ## first item data checks
-        assert location.text == 'foo-ANNEX HAY', f'location.text, ```{location.text}```'
+        assert location.text == 'ANNEX HAY', f'location.text, ```{location.text}```'
         assert call_number.text == self.first_item_target_callnumber, f'call_number.text, ```{call_number.text}```'
-        assert 'foo-AVAILABLE' in status.text, f'status.text, ```{status.text}```'  # request-access link will also be here (odd but true)
+        assert 'RESTRICTED' in status.text, f'status.text, ```{status.text}```'  # request-access link will also be here (odd but true)
 
         ## first item link-check
-        assert 'foo-request-access' in status.text, f'status.text, ```{status.text}```'
-        link = status.find_element_by_tag_name( 'a' )
-        assert 'foo-easyrequest_hay/confirm' in link.get_attribute('href'), link.get_attribute('href')
+        assert 'foo-request-access' not in status.text, f'status.text, ```{status.text}```'
+        # link = status.find_element_by_tag_name( 'a' )
+        # assert 'foo' in link.get_attribute('href'), link.get_attribute('href')
 
-        ## second item (annex-hay, due, no)
+        ## second item (annex-hay, available, yes)
         second_item_row = self.get_item( self.second_item_target_callnumber )
         ( location, call_number, status ) = self.get_item_info( second_item_row )
 
         ## second item data checks
-        assert location.text == 'foo-ANNEX HAY', f'location.text, ```{location.text}```'
+        assert location.text == 'ANNEX HAY', f'location.text, ```{location.text}```'
         assert call_number.text == self.second_item_target_callnumber, f'call_number.text, ```{call_number.text}```'
-        assert 'foo-DUE 06-22-18' in status.text, f'status.text, ```{status.text}```'  # request-access link will also be here (odd but true)
+        assert 'AVAILABLE' in status.text, f'status.text, ```{status.text}```'  # request-access link will also be here (odd but true)
 
         ## second item link-check
-        assert 'foo-request-access' not in status.text, f'status.text, ```{status.text}```'
+        assert 'request-access' in status.text, f'status.text, ```{status.text}```'
+        link = status.find_element_by_tag_name( 'a' )
+        assert 'easyrequest_hay' in link.get_attribute('href'), link.get_attribute('href')
 
-        ## third item (hay-microfilm, no)
+        ## third item (hay-archives, use-in-library, yes)
         third_item_row = self.get_item( self.third_item_target_callnumber )
         ( location, call_number, status ) = self.get_item_info( third_item_row )
 
         ## third item data checks
-        assert location.text == 'foo-HAY MICROFLM', f'location.text, ```{location.text}```'
+        assert location.text == 'HAY ARCHIVES', f'location.text, ```{location.text}```'
         assert call_number.text == self.third_item_target_callnumber, f'call_number.text, ```{call_number.text}```'
-        assert 'foo-USE IN LIBRARY' in status.text, f'status.text, ```{status.text}```'  # request-access link will also be here (odd but true)
+        assert 'USE IN LIBRARY' in status.text, f'status.text, ```{status.text}```'  # request-access link will also be here (odd but true)
 
         ## third item link-check
-        assert 'foo-request-access' not in status.text, f'status.text, ```{status.text}```'
+        assert 'request-access' in status.text, f'status.text, ```{status.text}```'
+        link = status.find_element_by_tag_name( 'a' )
+        assert 'brown.aeon.atlas-sys.com' in link.get_attribute('href'), link.get_attribute('href')
 
         self.browser.close()
         log.info( f'Result: test passed.' )  # won't get here unless all asserts pass
@@ -404,7 +408,7 @@ class GregorianResultsCheck:
             Called by run_check() """
         # log.info( f'target_callnumber, ```{target_callnumber}```' )
         bibs = self.browser.find_elements_by_css_selector( 'div.document' )
-        assert len(bibs) == 10, len(bibs)
+        assert len(bibs) == 3, len(bibs)
         target_row = 'init'
         for bib in bibs:
             rows = bib.find_elements_by_tag_name( 'tr' )

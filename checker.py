@@ -10,7 +10,7 @@ import logging, pprint, sys, traceback
 import settings
 from lib import page_checks
 from lib.page_checks import YokenCheck, JohnHayCheck, GregorianCheck, BrownCheck
-from lib.results_checks import BeckwithResultsCheck, YokenResultsCheck, JohnHayResultsCheck
+from lib.results_checks import BeckwithResultsCheck, YokenResultsCheck, JohnHayResultsCheck, GregorianResultsCheck
 
 
 logging.basicConfig(
@@ -43,10 +43,12 @@ def run_results_checks():
         # beckwith.run_check()
         # yoken = YokenResultsCheck()          # `Mel B. Yoken collection`
         # yoken.run_check()
-        john_hay = JohnHayResultsCheck()     # `John Hay papers`
-        john_hay.run_check()
-        # gregorian = GregorianCheck()  # `Vartan Gregorian papers`
-        # gregorian.run_check()
+        # john_hay = JohnHayResultsCheck()     # `John Hay papers`
+        # john_hay.run_check()
+
+        gregorian = GregorianResultsCheck()  # `Vartan Gregorian papers`
+        gregorian.run_check()
+
         # brown = BrownCheck()          # `John Nicholas Brown II papers`
         # brown.run_check()
     except Exception:
