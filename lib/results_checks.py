@@ -199,9 +199,11 @@ class JohnHayResultsCheck:
 
     def __init__(self):
         self.browser = Firefox(options=opts)
-        self.query = 'f[format][]=Archives/Manuscripts&q=beckwith'
-        self.first_item_target_callnumber = 'Ms.2010.010 Box 2'
-        self.second_item_target_callnumber = 'Ms.2015.016 Box 1, DVD 2 - Andes, Cheri'
+        self.query = 'f[format][]=Archives/Manuscripts&q=John Hay Papers'
+        self.first_item_target_callnumber = 'Ms.HAY Box 2'  # annex-hay, available, yes
+        self.second_item_target_callnumber = 'Ms.HAY Box 4'  # annex-hay, due, no
+        self.third_item_target_callnumber = 'F5701 reel 2'  # hay-microfilm, no
+        self.fourth_item_target_callnumber = '1-SIZE E664.H41 A3 1997ms v.2'  # hay-john-hay, no
         # self.blast_limits()
 
     # def blast_limits(self):
@@ -210,7 +212,7 @@ class JohnHayResultsCheck:
     #     self.browser.get( url )
 
     def run_check(self):
-        """ Checks permutations of `Archives/Manuscripts` `beckwith` search results. """
+        """ Checks permutations of `Archives/Manuscripts` `john hay papers` search results. """
 
         self.load_page()
 
@@ -228,19 +230,35 @@ class JohnHayResultsCheck:
         link = status.find_element_by_tag_name( 'a' )
         assert 'easyrequest_hay/confirm' in link.get_attribute('href'), link.get_attribute('href')
 
-        ## second item (hay-manuscripts with use-in-library status)
+        ## second item (annex-hay, due, no)
         second_item_row = self.get_item( self.second_item_target_callnumber )
         ( location, call_number, status ) = self.get_item_info( second_item_row )
 
         ## second item data checks
-        assert location.text == 'HAY MANUSCRIPTS', f'location.text, ```{location.text}```'
+        assert location.text == 'ANNEX HAY', f'location.text, ```{location.text}```'
         assert call_number.text == self.second_item_target_callnumber, f'call_number.text, ```{call_number.text}```'
-        assert 'USE IN LIBRARY' in status.text, f'status.text, ```{status.text}```'  # request-access link will also be here (odd but true)
+        assert 'DUE 06-22-18' in status.text, f'status.text, ```{status.text}```'  # request-access link will also be here (odd but true)
 
         ## second item link-check
-        assert 'request-access' in status.text, f'status.text, ```{status.text}```'
-        link = status.find_element_by_tag_name( 'a' )
-        assert 'brown.aeon.atlas-sys.com' in link.get_attribute('href'), link.get_attribute('href')
+        assert 'request-access' not in status.text, f'status.text, ```{status.text}```'
+
+        ## third item (hay-microfilm, no)
+        third_item_row = self.get_item( self.third_item_target_callnumber )
+        ( location, call_number, status ) = self.get_item_info( third_item_row )
+
+        ## third item data checks
+        assert location.text == 'HAY MICROFLM', f'location.text, ```{location.text}```'
+        assert call_number.text == self.third_item_target_callnumber, f'call_number.text, ```{call_number.text}```'
+        assert 'USE IN LIBRARY' in status.text, f'status.text, ```{status.text}```'  # request-access link will also be here (odd but true)
+
+        ## third item link-check
+        assert 'request-access' not in status.text, f'status.text, ```{status.text}```'
+        # link = status.find_element_by_tag_name( 'a' )
+        # assert 'foo-brown.aeon.atlas-sys.com' in link.get_attribute('href'), link.get_attribute('href')
+
+
+        1/0
+
 
         self.browser.close()
         log.info( f'Result: test passed.' )  # won't get here unless all asserts pass
@@ -257,18 +275,20 @@ class JohnHayResultsCheck:
         log.info( f'hitting url, ```{url}```' )
         #
         self.browser.get( url )
-        time.sleep( 1 )  # lets js load up page
+        time.sleep( 1.66 )  # lets js load up page
         return
 
     def get_item( self, target_callnumber ):
         """ Grabs bibs, finds correct row and returns it.
             Called by run_check() """
+        # log.info( f'target_callnumber, ```{target_callnumber}```' )
         bibs = self.browser.find_elements_by_css_selector( 'div.document' )
-        assert len(bibs) == 3, len(bibs)
+        assert len(bibs) == 10, len(bibs)
         target_row = 'init'
         for bib in bibs:
             rows = bib.find_elements_by_tag_name( 'tr' )
             for row in rows:
+                # log.info( f'row.text, ```{row.text}```' )
                 if target_callnumber in row.text:
                     target_row = row
                     log.debug( f'target_row found, ```{target_row.text}```' )
