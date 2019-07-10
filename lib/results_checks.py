@@ -34,11 +34,6 @@ class BeckwithResultsCheck:
         self.second_item_target_callnumber = 'Ms.2015.016 Box 1, DVD 2 - Andes, Cheri'
         # self.blast_limits()
 
-    # def blast_limits(self):
-    #     """ Warms availability cache to work around localhost and dblightcit lack of 'more' functionality. """
-    #     url = f'{settings.PRODUCTION_ROOT_PAGE_URL}?{self.query}'
-    #     self.browser.get( url )
-
     def run_check(self):
         """ Checks permutations of `Archives/Manuscripts` `beckwith` search results. """
 
@@ -95,7 +90,7 @@ class BeckwithResultsCheck:
         """ Grabs bibs, finds correct row and returns it.
             Called by run_check() """
         bibs = self.browser.find_elements_by_css_selector( 'div.document' )
-        assert len(bibs) == 3, len(bibs)
+        # assert len(bibs) == 3, len(bibs)
         target_row = 'init'
         for bib in bibs:
             rows = bib.find_elements_by_tag_name( 'tr' )
@@ -169,7 +164,7 @@ class YokenResultsCheck:
         """ Grabs bibs, finds second row in first bib.
             Called by run_check() """
         bibs = self.browser.find_elements_by_css_selector( 'div.document' )
-        assert len(bibs) == 1, len(bibs)
+        # assert len(bibs) == 1, len(bibs)
         first_bib = bibs[0]
         check_format( first_bib )
         rows = first_bib.find_elements_by_tag_name( 'tr' )
@@ -204,11 +199,6 @@ class JohnHayResultsCheck:
         self.third_item_target_callnumber = 'F5701 reel 2'  # hay-microfilm, no
         self.fourth_item_target_callnumber = '1-SIZE E664.H41 A3 1997ms v.2'  # hay-john-hay, no
         # self.blast_limits()
-
-    # def blast_limits(self):
-    #     """ Warms availability cache to work around localhost and dblightcit lack of 'more' functionality. """
-    #     url = f'{settings.PRODUCTION_ROOT_PAGE_URL}?{self.query}'
-    #     self.browser.get( url )
 
     def run_check(self):
         """ Checks permutations of `Archives/Manuscripts` `john hay papers` search results. """
@@ -289,7 +279,7 @@ class JohnHayResultsCheck:
             Called by run_check() """
         # log.info( f'target_callnumber, ```{target_callnumber}```' )
         bibs = self.browser.find_elements_by_css_selector( 'div.document' )
-        assert len(bibs) == 10, len(bibs)
+        # assert len(bibs) == 10, len(bibs)
         target_row = 'init'
         for bib in bibs:
             rows = bib.find_elements_by_tag_name( 'tr' )
@@ -318,10 +308,6 @@ class JohnHayResultsCheck:
     ## end class JohnHayResultsCheck
 
 
-
-
-
-
 class GregorianResultsCheck:
 
     def __init__(self):
@@ -331,11 +317,6 @@ class GregorianResultsCheck:
         self.second_item_target_callnumber = 'OF-1C-16 Box 5'  # annex-hay, available, yes
         self.third_item_target_callnumber = 'OF-1ZSE-1'  # hay-archives, use-in-library, yes
         # self.blast_limits()
-
-    # def blast_limits(self):
-    #     """ Warms availability cache to work around localhost and dblightcit lack of 'more' functionality. """
-    #     url = f'{settings.PRODUCTION_ROOT_PAGE_URL}?{self.query}'
-    #     self.browser.get( url )
 
     def run_check(self):
         """ Checks permutations of `Archives/Manuscripts` `john hay papers` search results. """
@@ -408,7 +389,7 @@ class GregorianResultsCheck:
             Called by run_check() """
         # log.info( f'target_callnumber, ```{target_callnumber}```' )
         bibs = self.browser.find_elements_by_css_selector( 'div.document' )
-        assert len(bibs) == 3, len(bibs)
+        # assert len(bibs) == 3, len(bibs)
         target_row = 'init'
         for bib in bibs:
             rows = bib.find_elements_by_tag_name( 'tr' )
@@ -440,143 +421,53 @@ class GregorianResultsCheck:
 
 
 
-
-class GregorianCheck:
-
-    def __init__(self):
-        self.browser = Firefox(options=opts)
-
-    def run_check(self):
-        """ Tests Hay `Archives/Manuscripts` `Vartan Gregorian papers` requirement.
-            For reference:
-            - annex-hay RESTRICTED item, `item_142740093`
-            - annex-hay non-restricted item, `item_142740287`
-            """
-
-        self.load_page()
-
-        ## format
-        format_element = self.browser.find_elements_by_class_name( 'blacklight-format' )[1]  # [0] is the word 'Format'
-        assert format_element.text == 'Archives/Manuscripts', f'format_element.text, ```{format_element.text}```'
-
-        ## first item info (annex-hay item available item)
-        first_item = self.browser.find_element_by_id( 'item_142740093' )
-        # log.info( f'first_item.text, ```{first_item.text}```' )
-        ( location, call_number, status ) = self.get_first_item_info( first_item )
-
-        ## first item empties test -- NO link should show
-        for class_type in [ 'scan', 'jcb_url', 'hay_aeon_url', 'ezb_volume_url', 'annexhay_easyrequest_url' ]:
-            request_link = first_item.find_element_by_class_name( class_type )
-            assert request_link.text == '', f'request_link.text, ```{request_link.text}```'
-
-        ## second item info (due item)
-        second_item = self.browser.find_element_by_id( 'item_142740287' )
-        ( location, call_number, status ) = self.get_second_item_info( second_item )
-
-        ## second item empties test
-        for class_type in [ 'scan', 'jcb_url', 'hay_aeon_url', 'ezb_volume_url' ]:
-            request_link = second_item.find_element_by_class_name( class_type )
-            assert request_link.text == '', f'request_link.text, ```{request_link.text}```'
-
-        ## second item link test -- `annexhay_easyrequest_url` link SHOULD show
-        request_link = second_item.find_element_by_class_name( 'annexhay_easyrequest_url' )
-        assert request_link.text.strip() == 'request-access', f'request_link.text, ```{request_link.text}```'
-
-        self.browser.close()
-        log.info( f'Result: test passed.' )  # won't get here unless all asserts pass
-
-        ## end def run_check()
-
-    def load_page( self ):
-        """ Hits url; returns browser object.
-            Called by run_check() """
-        aim = """\n-------\nGoal: Ensure a bib-format of `Archives/Manuscripts` with items of `RESTRICTED` status cannot be requested. """
-        log.info( aim )
-        bib = 'b4115486'
-        url = f'{settings.ROOT_PAGE_URL}/{bib}'
-        log.info( f'hitting url, ```{url}```' )
-        #
-        self.browser.get( url )
-        return
-
-    def get_first_item_info( self, first_item ):
-        """ Parses item.
-            Called by run_check() """
-        log.info( f'first_item.text, ```{first_item.text}```' )
-        location = first_item.find_element_by_class_name( 'location' )
-        assert location.text == 'ANNEX HAY', f'location.text, ```{location.text}```'
-        #
-        call_number = first_item.find_element_by_class_name( 'callnumber' )
-        assert call_number.text == 'OF-1C-16 Box 1', f'call_number.text, ```{call_number.text}```'
-        #
-        status = first_item.find_element_by_class_name( 'status' )
-        assert status.text == 'RESTRICTED', f'status.text, ```{status.text}```'
-        return ( location, call_number, status )
-
-    def get_second_item_info( self, second_item ):
-        """ Parses item.
-            Called by run_check() """
-        log.info( f'second_item.text, ```{second_item.text}```' )
-        location = second_item.find_element_by_class_name( 'location' )
-        assert location.text == 'ANNEX HAY', f'location.text, ```{location.text}```'
-        #
-        call_number = second_item.find_element_by_class_name( 'callnumber' )
-        assert call_number.text == 'OF-1C-16 Box 4', f'call_number.text, ```{call_number.text}```'
-        #
-        status = second_item.find_element_by_class_name( 'status' )
-        assert status.text == 'AVAILABLE', f'status.text, ```{status.text}```'
-        return ( location, call_number, status )
-
-    ## end class GregorianCheck
-
-
-class BrownCheck:
+class BrownResultsCheck:
 
     def __init__(self):
         self.browser = Firefox(options=opts)
-        self.bib = 'b3969016'
+        self.query = 'f[format][]=Archives/Manuscripts&q=John Nicholas Brown II papers'
+        self.first_item_target_callnumber = 'Ms.2007.012 Box 10'  # annex-hay, available, yes
+        self.second_item_target_callnumber = 'Ms.2007.012 Box 142 - RESTRICTED'  # annex-hay, available, but restricted by callnumber, no
         self.blast_limits()
 
     def blast_limits(self):
         """ Warms availability cache to work around localhost and dblightcit lack of 'more' functionality. """
-        url = f'{settings.PRODUCTION_ROOT_PAGE_URL}/{self.bib}?limit=false'
+        url = f'{settings.PRODUCTION_ROOT_PAGE_URL}/catalog/b3969016?limit=false'
+        log.info( f'limit-blaster url, ```{url}```' )
         self.browser.get( url )
 
     def run_check(self):
-        """ Tests Hay `Archives/Manuscripts` `John Nicholas Brown II papers` requirement.
-            For reference:
-            - annex-hay RESTRICTED-via-callnumber item, `item_184782697`
-            - annex-hay non-restricted item, `item_140852803`
-            """
+        """ Checks permutations of `Archives/Manuscripts` `john hay papers` search results. """
 
         self.load_page()
 
-        ## format
-        format_element = self.browser.find_elements_by_class_name( 'blacklight-format' )[1]  # [0] is the word 'Format'
-        assert format_element.text == 'Archives/Manuscripts', f'format_element.text, ```{format_element.text}```'
+        ## first item (annex-hay, restricted, no)
+        first_item_row = self.get_item( self.first_item_target_callnumber )
+        ( location, call_number, status ) = self.get_item_info( first_item_row )
 
-        ## first item info (annex-hay item available, but restricted-via-callnumber item)
-        first_item = self.browser.find_element_by_id( 'item_184782697' )
-        # log.info( f'first_item.text, ```{first_item.text}```' )
-        ( location, call_number, status ) = self.get_first_item_info( first_item )
+        ## first item data checks
+        assert location.text == 'foo-ANNEX HAY', f'location.text, ```{location.text}```'
+        assert call_number.text == self.first_item_target_callnumber, f'call_number.text, ```{call_number.text}```'
+        assert 'foo-RESTRICTED' in status.text, f'status.text, ```{status.text}```'  # request-access link will also be here (odd but true)
 
-        ## first item empties test -- NO link should show
-        for class_type in [ 'scan', 'jcb_url', 'hay_aeon_url', 'ezb_volume_url', 'annexhay_easyrequest_url' ]:
-            request_link = first_item.find_element_by_class_name( class_type )
-            assert request_link.text == '', f'request_link.text, ```{request_link.text}```'
+        ## first item link-check
+        assert 'foo-foo-request-access' not in status.text, f'status.text, ```{status.text}```'
+        # link = status.find_element_by_tag_name( 'a' )
+        # assert 'foo' in link.get_attribute('href'), link.get_attribute('href')
 
-        ## second item info (regular annex-hay available item)
-        second_item = self.browser.find_element_by_id( 'item_140852803' )
-        ( location, call_number, status ) = self.get_second_item_info( second_item )
+        ## second item (annex-hay, available, yes)
+        second_item_row = self.get_item( self.second_item_target_callnumber )
+        ( location, call_number, status ) = self.get_item_info( second_item_row )
 
-        ## second item empties test
-        for class_type in [ 'scan', 'jcb_url', 'hay_aeon_url', 'ezb_volume_url' ]:
-            request_link = second_item.find_element_by_class_name( class_type )
-            assert request_link.text == '', f'request_link.text, ```{request_link.text}```'
+        ## second item data checks
+        assert location.text == 'foo-ANNEX HAY', f'location.text, ```{location.text}```'
+        assert call_number.text == self.second_item_target_callnumber, f'call_number.text, ```{call_number.text}```'
+        assert 'foo-AVAILABLE' in status.text, f'status.text, ```{status.text}```'  # request-access link will also be here (odd but true)
 
-        ## second item link test -- `annexhay_easyrequest_url` link SHOULD show
-        request_link = second_item.find_element_by_class_name( 'annexhay_easyrequest_url' )
-        assert request_link.text.strip() == 'request-access', f'request_link.text, ```{request_link.text}```'
+        ## second item link-check
+        assert 'foo-request-access' in status.text, f'status.text, ```{status.text}```'
+        link = status.find_element_by_tag_name( 'a' )
+        assert 'foo-easyrequest_hay' in link.get_attribute('href'), link.get_attribute('href')
 
         self.browser.close()
         log.info( f'Result: test passed.' )  # won't get here unless all asserts pass
@@ -586,40 +477,46 @@ class BrownCheck:
     def load_page( self ):
         """ Hits url; returns browser object.
             Called by run_check() """
-        aim = """\n-------\nGoal: Ensure a bib-format of `Archives/Manuscripts` -- with items that are `RESTRICTED` via callnumber -- cannot be requested. """
+        aim = """\n-------\nGoal: `ANNEX HAY` location items with status `AVAILABLE` will have an easyrequest-hay link,
+      & `HAY MANUSCRIPTS` location items with status `USE IN LIBRARY` will have an Aeon link. """
         log.info( aim )
-        url = f'{settings.ROOT_PAGE_URL}/{self.bib}?limit=false'
+        url = f'{settings.ROOT_PAGE_URL}?{self.query}'
         log.info( f'hitting url, ```{url}```' )
         #
         self.browser.get( url )
+        self.browser.implicitly_wait(2)
+        # time.sleep( 1.66 )  # lets js load up page
         return
 
-    def get_first_item_info( self, first_item ):
+    def get_item( self, target_callnumber ):
+        """ Grabs bibs, finds correct row and returns it.
+            Called by run_check() """
+        # log.info( f'target_callnumber, ```{target_callnumber}```' )
+        bibs = self.browser.find_elements_by_css_selector( 'div.document' )
+        # assert len(bibs) == 2, len(bibs)
+        target_row = 'init'
+        for bib in bibs:
+            rows = bib.find_elements_by_tag_name( 'tr' )
+            for row in rows:
+                # log.info( f'row.text, ```{row.text}```' )
+                if target_callnumber in row.text:
+                    target_row = row
+                    log.debug( f'target_row found, ```{target_row.text}```' )
+                    break
+            if target_row != 'init':
+                check_format( bib )
+                break
+        log.info( f'target_row.text, ```{target_row.text}```' )
+        assert target_callnumber in target_row.text
+        return target_row
+
+    def get_item_info( self, first_row ):
         """ Parses item.
             Called by run_check() """
-        log.info( f'first_item.text, ```{first_item.text}```' )
-        location = first_item.find_element_by_class_name( 'location' )
-        assert location.text == 'ANNEX HAY', f'location.text, ```{location.text}```'
-        #
-        call_number = first_item.find_element_by_class_name( 'callnumber' )
-        assert call_number.text == 'Ms.2007.012 Box 142 - RESTRICTED', f'call_number.text, ```{call_number.text}```'
-        #
-        status = first_item.find_element_by_class_name( 'status' )
-        assert status.text == 'AVAILABLE', f'status.text, ```{status.text}```'
+        cells = first_row.find_elements_by_tag_name( 'td' )
+        location = cells[0]
+        call_number = cells[1]
+        status = cells[2]
         return ( location, call_number, status )
 
-    def get_second_item_info( self, second_item ):
-        """ Parses item.
-            Called by run_check() """
-        log.info( f'second_item.text, ```{second_item.text}```' )
-        location = second_item.find_element_by_class_name( 'location' )
-        assert location.text == 'ANNEX HAY', f'location.text, ```{location.text}```'
-        #
-        call_number = second_item.find_element_by_class_name( 'callnumber' )
-        assert call_number.text == 'Ms.2007.012 Box 8', f'call_number.text, ```{call_number.text}```'
-        #
-        status = second_item.find_element_by_class_name( 'status' )
-        assert status.text == 'AVAILABLE', f'status.text, ```{status.text}```'
-        return ( location, call_number, status )
-
-    ## end class BrownCheck
+    ## end class BrownResultsCheck

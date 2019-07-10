@@ -10,7 +10,7 @@ import logging, pprint, sys, traceback
 import settings
 from lib import page_checks
 from lib.page_checks import YokenCheck, JohnHayCheck, GregorianCheck, BrownCheck
-from lib.results_checks import BeckwithResultsCheck, YokenResultsCheck, JohnHayResultsCheck, GregorianResultsCheck
+from lib.results_checks import BeckwithResultsCheck, YokenResultsCheck, JohnHayResultsCheck, GregorianResultsCheck, BrownResultsCheck
 
 
 logging.basicConfig(
@@ -45,12 +45,12 @@ def run_results_checks():
         # yoken.run_check()
         # john_hay = JohnHayResultsCheck()     # `John Hay papers`
         # john_hay.run_check()
+        # gregorian = GregorianResultsCheck()  # `Vartan Gregorian papers`
+        # gregorian.run_check()
 
-        gregorian = GregorianResultsCheck()  # `Vartan Gregorian papers`
-        gregorian.run_check()
+        brown = BrownResultsCheck()          # `John Nicholas Brown II papers`
+        brown.run_check()
 
-        # brown = BrownCheck()          # `John Nicholas Brown II papers`
-        # brown.run_check()
     except Exception:
         log.exception( 'exception; traceback...' )
         # raise
