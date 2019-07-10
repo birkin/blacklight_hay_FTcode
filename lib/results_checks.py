@@ -50,7 +50,7 @@ class BeckwithResultsCheck:
 
         ## first item data checks
         assert location.text == 'ANNEX HAY', f'location.text, ```{location.text}```'
-        assert call_number.text == 'Ms.2010.010 Box 2', f'call_number.text, ```{call_number.text}```'
+        assert call_number.text == self.first_item_target_callnumber, f'call_number.text, ```{call_number.text}```'
         assert 'AVAILABLE' in status.text, f'status.text, ```{status.text}```'  # request-access link will also be here (odd but true)
 
         ## first item link-check
@@ -133,7 +133,7 @@ class YokenResultsCheck:
     def __init__(self):
         self.browser = Firefox(options=opts)
         self.query = 'f[format][]=Archives/Manuscripts&q=yoken'
-        self.first_item_target_callnumber = 'Ms.2010.010 Box 2'
+        self.first_item_target_callnumber = 'Ms.2011.038 Box 1'
 
     def run_check(self):
         """ Tests `Archives/Manuscripts` `yoken` search results. """
@@ -145,8 +145,8 @@ class YokenResultsCheck:
         ( location, call_number, status ) = self.get_first_item_info( first_row )
 
         ## first item data checks
-        assert location.text == 'ANNEX HAY', f'location.text, ```{location.text}```'
-        assert call_number.text == 'Ms.2010.010 Box 2', f'call_number.text, ```{call_number.text}```'
+        assert location.text == 'HAY MANUSCRIPTS', f'location.text, ```{location.text}```'
+        assert call_number.text == self.first_item_target_callnumber, f'call_number.text, ```{call_number.text}```'
         assert 'AVAILABLE' in status.text, f'status.text, ```{status.text}```'  # request-access link will also be here (odd but true)
 
         ## first item link-check
@@ -177,7 +177,7 @@ class YokenResultsCheck:
         bibs = self.browser.find_elements_by_css_selector( 'div.document' )
         assert len(bibs) == 1, len(bibs)
         first_bib = bibs[0]
-        self.check_format( first_bib )
+        check_format( first_bib )
         rows = first_bib.find_elements_by_tag_name( 'tr' )
         target_row = 'init'
         for row in rows:
@@ -188,32 +188,13 @@ class YokenResultsCheck:
         assert self.first_item_target_callnumber in target_row.text
         return target_row
 
-    def get_first_item_info( self, first_item ):
+    def get_first_item_info( self, first_row ):
         """ Parses item.
             Called by run_check() """
-        log.info( f'first_item.text, ```{first_item.text}```' )
-        location = first_item.find_element_by_class_name( 'location' )
-        assert location.text == 'HAY MANUSCRIPTS', f'location.text, ```{location.text}```'
-        #
-        call_number = first_item.find_element_by_class_name( 'callnumber' )
-        assert call_number.text == 'Oversize Box 1XX', f'call_number.text, ```{call_number.text}```'
-        #
-        status = first_item.find_element_by_class_name( 'status' )
-        assert status.text == '--', f'status.text, ```{status.text}```'
-        return ( location, call_number, status )
-
-    def get_second_item_info( self, second_item ):
-        """ Parses item.
-            Called by run_check() """
-        log.info( f'second_item.text, ```{second_item.text}```' )
-        location = second_item.find_element_by_class_name( 'location' )
-        assert location.text == 'HAY MANUSCRIPTS', f'location.text, ```{location.text}```'
-        #
-        call_number = second_item.find_element_by_class_name( 'callnumber' )
-        assert call_number.text == 'Ms.2011.038 Box 1', f'call_number.text, ```{call_number.text}```'
-        #
-        status = second_item.find_element_by_class_name( 'status' )
-        assert status.text == 'AVAILABLE', f'status.text, ```{status.text}```'
+        cells = first_row.find_elements_by_tag_name( 'td' )
+        location = cells[0]
+        call_number = cells[1]
+        status = cells[2]
         return ( location, call_number, status )
 
     ## end class YokenCheck
