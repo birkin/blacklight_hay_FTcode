@@ -21,6 +21,7 @@ def check_A():
     """ Tests Hay `Archives/Manuscripts` `David Beckwith papers` requirement. """
 
     browser = Firefox(options=opts)
+    browser.implicitly_wait( settings.BROWSER_WAIT_SECONDS )
 
     ## load page
     aim = """\n-------\nGoal: Ensure a format of `Archives/Manuscripts` with a location of `ANNEX HAY` shows the easyrequest_hay request url. """
@@ -67,6 +68,7 @@ class YokenCheck:
 
     def __init__(self):
         self.browser = Firefox(options=opts)
+        self.browser.implicitly_wait( settings.BROWSER_WAIT_SECONDS )
 
     def run_check(self):
         """ Tests Hay `Archives/Manuscripts` `Mel B. Yoken collection` requirement. """
@@ -153,6 +155,7 @@ class JohnHayCheck:
 
     def __init__(self):
         self.browser = Firefox(options=opts)
+        self.browser.implicitly_wait( settings.BROWSER_WAIT_SECONDS )
         self.bib = 'b2498067'
         self.blast_limits()
 
@@ -160,6 +163,7 @@ class JohnHayCheck:
         """ Warms availability cache to work around localhost and dblightcit lack of 'more' functionality. """
         url = f'{settings.PRODUCTION_ROOT_PAGE_URL}/{self.bib}?limit=false'
         self.browser.get( url )
+
 
     def run_check(self):
         """ Tests Hay `Archives/Manuscripts` `John Hay papers` requirement.
@@ -277,6 +281,7 @@ class GregorianCheck:
 
     def __init__(self):
         self.browser = Firefox(options=opts)
+        self.browser.implicitly_wait( settings.BROWSER_WAIT_SECONDS )
 
     def run_check(self):
         """ Tests Hay `Archives/Manuscripts` `Vartan Gregorian papers` requirement.
@@ -366,6 +371,7 @@ class BrownCheck:
 
     def __init__(self):
         self.browser = Firefox(options=opts)
+        self.browser.implicitly_wait( settings.BROWSER_WAIT_SECONDS )
         self.bib = 'b3969016'
         self.blast_limits()
 
