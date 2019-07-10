@@ -10,6 +10,7 @@ import logging, pprint, sys, traceback
 import settings
 from lib import page_checks
 from lib.page_checks import YokenCheck, JohnHayCheck, GregorianCheck, BrownCheck
+from lib.results_checks import BeckwithResultsCheck
 
 
 logging.basicConfig(
@@ -38,22 +39,23 @@ def run_page_checks():
 def run_results_checks():
     """ Manages functional-checks for bib-pages. """
     try:
-        page_checks.check_A()         # `David Beckwith papers`
-        yoken = YokenCheck()          # `Mel B. Yoken collection`
-        yoken.run_check()
-        john_hay = JohnHayCheck()     # `John Hay papers`
-        john_hay.run_check()
-        gregorian = GregorianCheck()  # `Vartan Gregorian papers`
-        gregorian.run_check()
-        brown = BrownCheck()          # `John Nicholas Brown II papers`
-        brown.run_check()
+        beckwith = BeckwithResultsCheck()    # `David Beckwith papers`
+        beckwith.run_check()
+        # yoken = YokenCheck()          # `Mel B. Yoken collection`
+        # yoken.run_check()
+        # john_hay = JohnHayCheck()     # `John Hay papers`
+        # john_hay.run_check()
+        # gregorian = GregorianCheck()  # `Vartan Gregorian papers`
+        # gregorian.run_check()
+        # brown = BrownCheck()          # `John Nicholas Brown II papers`
+        # brown.run_check()
     except Exception:
         log.exception( 'exception; traceback...' )
         # raise
 
 
-run_page_checks()
-# run_results_checks()
+# run_page_checks()
+run_results_checks()
 try:
     browser.close()
 except:

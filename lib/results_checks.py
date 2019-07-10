@@ -1,4 +1,4 @@
-import logging, pprint, sys, traceback
+import logging, pprint, sys, time, traceback
 
 import settings
 from selenium.webdriver import Firefox
@@ -17,50 +17,125 @@ opts = Options()
 # assert opts.headless  # Operating in headless mode
 
 
-def BeckwithResultsCheck():
-    """ Tests Hay `Archives/Manuscripts` `David Beckwith papers` _results_ requirement. """
+class BeckwithResultsCheck:
 
-    browser = Firefox(options=opts)
+    def __init__(self):
+        self.browser = Firefox(options=opts)
+        self.query = 'f[format][]=Archives/Manuscripts&q=beckwith'
+        # self.blast_limits()
 
-    ## load page
-    aim = """\n-------\nGoal: Ensure a format of `Archives/Manuscripts` with a location of `ANNEX HAY` shows the easyrequest_hay request url. """
-    log.info( aim )
-    bib = 'b5706110'
-    url = f'{settings.ROOT_PAGE_URL}/{bib}'
-    log.info( f'hitting url, ```{url}```' )
-    #
-    browser.get( url )
+    # def blast_limits(self):
+    #     """ Warms availability cache to work around localhost and dblightcit lack of 'more' functionality. """
+    #     url = f'{settings.PRODUCTION_ROOT_PAGE_URL}?{self.query}'
+    #     self.browser.get( url )
 
-    ## format
-    format_element = browser.find_elements_by_class_name( 'blacklight-format' )[1]  # [0] is the word 'Format'
-    assert format_element.text == 'Archives/Manuscripts', f'format_element.text, ```{format_element.text}```'
+    def run_check(self):
+        """ Tests permutations of `Archives/Manuscripts` `beckwith` search results.
+            For reference:
+            - annex-hay RESTRICTED-via-callnumber item, `item_184782697`
+            - annex-hay non-restricted item, `item_140852803`
+            """
 
-    ## main item info
-    first_item = browser.find_elements_by_class_name( 'bib_item' )[0]
-    # print( f'first_item.text, ```{first_item.text}```' )
-    location = first_item.find_element_by_class_name( 'location' )
-    assert location.text == 'ANNEX HAY', f'location.text, ```{location.text}```'
-    #
-    call_number = first_item.find_element_by_class_name( 'callnumber' )
-    assert call_number.text == 'Ms.2010.010 Box 1', f'call_number.text, ```{call_number.text}```'
-    #
-    status = first_item.find_element_by_class_name( 'status' )
-    assert status.text == 'AVAILABLE', f'status.text, ```{status.text}```'
+        self.load_page()
 
-    ## empties test
-    for class_type in [ 'scan', 'jcb_url', 'hay_aeon_url', 'ezb_volume_url' ]:
-        empty_link_element = first_item.find_element_by_class_name( class_type )
-        assert empty_link_element.text == '', f'empty_link_element.text, ```{empty_link_element.text}```'
-        # print( f'good, no class_type, {class_type}' )
+        # ## format
+        # format_element = self.browser.find_elements_by_class_name( 'blacklight-format' )[1]  # [0] is the word 'Format'
+        # assert format_element.text == 'Archives/Manuscripts', f'format_element.text, ```{format_element.text}```'
 
-    ## real test -- easyrequest-hay link should show
-    request_link = first_item.find_element_by_class_name( 'annexhay_easyrequest_url' )
-    assert request_link.text.strip() == 'request-access', f'request_link.text, ```{request_link.text}```'
+        ## first item info (annex-hay item available)
+        first_item = self.get_first_item()
+        ( location, call_number, status ) = self.get_first_item_info( first_item )
 
-    browser.close()
-    log.info( f'Result: test passed.' )  # won't get here unless all asserts pass
 
-    ## end def check_A()
+        ## first item info link-check
+        assert 'request-access' in status.text, f'status.text, ```{status.text}```'
+
+        ## next: get link and test for proper _kind_ of link
+
+
+        1/0
+
+
+
+        ## first item empties test -- NO link should show
+        for class_type in [ 'scan', 'jcb_url', 'hay_aeon_url', 'ezb_volume_url', 'annexhay_easyrequest_url' ]:
+            request_link = first_item.find_element_by_class_name( class_type )
+            assert request_link.text == '', f'request_link.text, ```{request_link.text}```'
+
+        # ## second item info (regular annex-hay available item)
+        # second_item = self.browser.find_element_by_id( 'item_140852803' )
+        # ( location, call_number, status ) = self.get_second_item_info( second_item )
+
+        # ## second item empties test
+        # for class_type in [ 'scan', 'jcb_url', 'hay_aeon_url', 'ezb_volume_url' ]:
+        #     request_link = second_item.find_element_by_class_name( class_type )
+        #     assert request_link.text == '', f'request_link.text, ```{request_link.text}```'
+
+        # ## second item link test -- `annexhay_easyrequest_url` link SHOULD show
+        # request_link = second_item.find_element_by_class_name( 'annexhay_easyrequest_url' )
+        # assert request_link.text.strip() == 'request-access', f'request_link.text, ```{request_link.text}```'
+
+        self.browser.close()
+        log.info( f'Result: test passed.' )  # won't get here unless all asserts pass
+
+        ## end def run_check()
+
+    def load_page( self ):
+        """ Hits url; returns browser object.
+            Called by run_check() """
+        aim = """\n-------\nGoal: `ANNEX HAY` location items with status `AVAILABLE` will have an easyrequest-hay link,
+& `HAY MANUSCRIPTS` location items with status `USE IN LIBRARY` will have an Aeon link. """
+        log.info( aim )
+        url = f'{settings.ROOT_PAGE_URL}?{self.query}'
+        log.info( f'hitting url, ```{url}```' )
+        #
+        self.browser.get( url )
+        time.sleep( .5 )  # lets js load up page
+        return
+
+    def get_first_item( self ):
+        """ Grabs bibs, finds second row in first bib.
+            Called by run_check() """
+        bibs = self.browser.find_elements_by_css_selector( 'div.document' )
+        assert len(bibs) == 3, len(bibs)
+        first_bib = bibs[0]
+        rows = first_bib.find_elements_by_tag_name( 'tr' )
+        target_row = 'init'
+        for row in rows:
+            target_callnumber = 'Ms.2010.010 Box 2'
+            if target_callnumber in row.text:
+                target_row = row
+        log.info( f'target_row.text, ```{target_row.text}```' )
+        assert target_callnumber in target_row.text
+        return target_row
+
+    def get_first_item_info( self, first_item ):
+        """ Parses item.
+            Called by run_check() """
+        cells = first_item.find_elements_by_tag_name( 'td' )
+        location = cells[0]
+        assert location.text == 'ANNEX HAY', f'location.text, ```{location.text}```'
+        call_number = cells[1]
+        assert call_number.text == 'Ms.2010.010 Box 2', f'call_number.text, ```{call_number.text}```'
+        status = cells[2]
+        assert 'AVAILABLE' in status.text, f'status.text, ```{status.text}```'  # request-access link will also be here (odd but true)
+        return ( location, call_number, status )
+
+    # def get_second_item_info( self, second_item ):
+    #     """ Parses item.
+    #         Called by run_check() """
+    #     log.info( f'second_item.text, ```{second_item.text}```' )
+    #     location = second_item.find_element_by_class_name( 'location' )
+    #     assert location.text == 'ANNEX HAY', f'location.text, ```{location.text}```'
+    #     #
+    #     call_number = second_item.find_element_by_class_name( 'callnumber' )
+    #     assert call_number.text == 'Ms.2007.012 Box 8', f'call_number.text, ```{call_number.text}```'
+    #     #
+    #     status = second_item.find_element_by_class_name( 'status' )
+    #     assert status.text == 'AVAILABLE', f'status.text, ```{status.text}```'
+    #     return ( location, call_number, status )
+
+    ## end class BeckwithResultsCheck
 
 
 class YokenCheck:
