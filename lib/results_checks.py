@@ -152,9 +152,7 @@ class YokenResultsCheck:
         ## first item link-check
         assert 'request-access' in status.text, f'status.text, ```{status.text}```'
         link = status.find_element_by_tag_name( 'a' )
-        assert 'easyrequest_hay/confirm' in link.get_attribute('href'), link.get_attribute('href')
-
-        ## TODO: second item?
+        assert 'brown.aeon.atlas-sys.com' in link.get_attribute('href'), link.get_attribute('href')
 
         self.browser.close()
         log.info( f'Result: test passed.' )  # won't get here unless all asserts pass
