@@ -39,24 +39,22 @@ def run_page_checks():
 def run_results_checks():
     """ Manages functional-checks for bib-pages. """
     try:
-        # beckwith = BeckwithResultsCheck()    # `David Beckwith papers`
-        # beckwith.run_check()
-        # yoken = YokenResultsCheck()          # `Mel B. Yoken collection`
-        # yoken.run_check()
-        # john_hay = JohnHayResultsCheck()     # `John Hay papers`
-        # john_hay.run_check()
-        # gregorian = GregorianResultsCheck()  # `Vartan Gregorian papers`
-        # gregorian.run_check()
-
+        beckwith = BeckwithResultsCheck()    # `David Beckwith papers`
+        beckwith.run_check()
+        yoken = YokenResultsCheck()          # `Mel B. Yoken collection`
+        yoken.run_check()
+        john_hay = JohnHayResultsCheck()     # `John Hay papers`
+        john_hay.run_check()
+        gregorian = GregorianResultsCheck()  # `Vartan Gregorian papers`
+        gregorian.run_check()
         brown = BrownResultsCheck()          # `John Nicholas Brown II papers`
         brown.run_check()
-
     except Exception:
         log.exception( 'exception; traceback...' )
         # raise
 
 
-# run_page_checks()
+run_page_checks()
 run_results_checks()
 try:
     browser.close()

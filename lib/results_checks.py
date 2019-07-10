@@ -418,9 +418,6 @@ class GregorianResultsCheck:
     ## end class GregorianResultsCheck
 
 
-
-
-
 class BrownResultsCheck:
 
     def __init__(self):
@@ -432,7 +429,7 @@ class BrownResultsCheck:
 
     def blast_limits(self):
         """ Warms availability cache to work around localhost and dblightcit lack of 'more' functionality. """
-        url = f'{settings.PRODUCTION_ROOT_PAGE_URL}/catalog/b3969016?limit=false'
+        url = f'{settings.PRODUCTION_ROOT_PAGE_URL}/b3969016?limit=false'
         log.info( f'limit-blaster url, ```{url}```' )
         self.browser.get( url )
 
@@ -441,33 +438,33 @@ class BrownResultsCheck:
 
         self.load_page()
 
-        ## first item (annex-hay, restricted, no)
+        ## first item (annex-hay, available, yes)
         first_item_row = self.get_item( self.first_item_target_callnumber )
         ( location, call_number, status ) = self.get_item_info( first_item_row )
 
         ## first item data checks
-        assert location.text == 'foo-ANNEX HAY', f'location.text, ```{location.text}```'
+        assert location.text == 'ANNEX HAY', f'location.text, ```{location.text}```'
         assert call_number.text == self.first_item_target_callnumber, f'call_number.text, ```{call_number.text}```'
-        assert 'foo-RESTRICTED' in status.text, f'status.text, ```{status.text}```'  # request-access link will also be here (odd but true)
+        assert 'AVAILABLE' in status.text, f'status.text, ```{status.text}```'  # request-access link will also be here (odd but true)
 
         ## first item link-check
-        assert 'foo-foo-request-access' not in status.text, f'status.text, ```{status.text}```'
-        # link = status.find_element_by_tag_name( 'a' )
-        # assert 'foo' in link.get_attribute('href'), link.get_attribute('href')
+        assert 'request-access' in status.text, f'status.text, ```{status.text}```'
+        link = status.find_element_by_tag_name( 'a' )
+        assert 'easyrequest_hay' in link.get_attribute('href'), link.get_attribute('href')
 
-        ## second item (annex-hay, available, yes)
+        ## second item (annex-hay, available, but restricted by callnumber, no)
         second_item_row = self.get_item( self.second_item_target_callnumber )
         ( location, call_number, status ) = self.get_item_info( second_item_row )
 
         ## second item data checks
-        assert location.text == 'foo-ANNEX HAY', f'location.text, ```{location.text}```'
+        assert location.text == 'ANNEX HAY', f'location.text, ```{location.text}```'
         assert call_number.text == self.second_item_target_callnumber, f'call_number.text, ```{call_number.text}```'
-        assert 'foo-AVAILABLE' in status.text, f'status.text, ```{status.text}```'  # request-access link will also be here (odd but true)
+        assert 'AVAILABLE' in status.text, f'status.text, ```{status.text}```'  # request-access link will also be here (odd but true)
 
         ## second item link-check
-        assert 'foo-request-access' in status.text, f'status.text, ```{status.text}```'
-        link = status.find_element_by_tag_name( 'a' )
-        assert 'foo-easyrequest_hay' in link.get_attribute('href'), link.get_attribute('href')
+        assert 'request-access' not in status.text, f'status.text, ```{status.text}```'
+        # link = status.find_element_by_tag_name( 'a' )
+        # assert 'foo' in link.get_attribute('href'), link.get_attribute('href')
 
         self.browser.close()
         log.info( f'Result: test passed.' )  # won't get here unless all asserts pass
