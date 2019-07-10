@@ -23,6 +23,7 @@ class BeckwithResultsCheck:
         self.browser = Firefox(options=opts)
         self.query = 'f[format][]=Archives/Manuscripts&q=beckwith'
         self.first_item_target_callnumber = 'Ms.2010.010 Box 2'
+        self.second_item_target_callnumber = 'foo'
         # self.blast_limits()
 
     # def blast_limits(self):
@@ -53,24 +54,7 @@ class BeckwithResultsCheck:
         link = status.find_element_by_tag_name( 'a' )
         assert 'easyrequest_hay/confirm' in link.get_attribute('href'), link.get_attribute('href')
 
-
-
-        1/0
-
-
-
-        # ## second item info (regular annex-hay available item)
-        # second_item = self.browser.find_element_by_id( 'item_140852803' )
-        # ( location, call_number, status ) = self.get_second_item_info( second_item )
-
-        # ## second item empties test
-        # for class_type in [ 'scan', 'jcb_url', 'hay_aeon_url', 'ezb_volume_url' ]:
-        #     request_link = second_item.find_element_by_class_name( class_type )
-        #     assert request_link.text == '', f'request_link.text, ```{request_link.text}```'
-
-        # ## second item link test -- `annexhay_easyrequest_url` link SHOULD show
-        # request_link = second_item.find_element_by_class_name( 'annexhay_easyrequest_url' )
-        # assert request_link.text.strip() == 'request-access', f'request_link.text, ```{request_link.text}```'
+        ## second item
 
         self.browser.close()
         log.info( f'Result: test passed.' )  # won't get here unless all asserts pass
@@ -81,7 +65,7 @@ class BeckwithResultsCheck:
         """ Hits url; returns browser object.
             Called by run_check() """
         aim = """\n-------\nGoal: `ANNEX HAY` location items with status `AVAILABLE` will have an easyrequest-hay link,
-& `HAY MANUSCRIPTS` location items with status `USE IN LIBRARY` will have an Aeon link. """
+      & `HAY MANUSCRIPTS` location items with status `USE IN LIBRARY` will have an Aeon link. """
         log.info( aim )
         url = f'{settings.ROOT_PAGE_URL}?{self.query}'
         log.info( f'hitting url, ```{url}```' )
@@ -100,11 +84,11 @@ class BeckwithResultsCheck:
         rows = first_bib.find_elements_by_tag_name( 'tr' )
         target_row = 'init'
         for row in rows:
-            if first_item_target_callnumber in row.text:
+            if self.first_item_target_callnumber in row.text:
                 target_row = row
                 break
         log.info( f'target_row.text, ```{target_row.text}```' )
-        assert target_callnumber in target_row.text
+        assert self.first_item_target_callnumber in target_row.text
         return target_row
 
     def check_format( self, bib ):
