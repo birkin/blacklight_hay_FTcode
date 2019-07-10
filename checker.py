@@ -19,8 +19,24 @@ logging.basicConfig(
 log = logging.getLogger(__name__)
 
 
-def run_checks():
-    """ Manages functional-checks. """
+def run_page_checks():
+    """ Manages functional-checks for bib-pages. """
+    try:
+        page_checks.check_A()         # `David Beckwith papers`
+        yoken = YokenCheck()          # `Mel B. Yoken collection`
+        yoken.run_check()
+        john_hay = JohnHayCheck()     # `John Hay papers`
+        john_hay.run_check()
+        gregorian = GregorianCheck()  # `Vartan Gregorian papers`
+        gregorian.run_check()
+        brown = BrownCheck()          # `John Nicholas Brown II papers`
+        brown.run_check()
+    except Exception:
+        log.exception( 'exception; traceback...' )
+        # raise
+
+def run_results_checks():
+    """ Manages functional-checks for bib-pages. """
     try:
         page_checks.check_A()         # `David Beckwith papers`
         yoken = YokenCheck()          # `Mel B. Yoken collection`
@@ -36,7 +52,8 @@ def run_checks():
         # raise
 
 
-run_checks()
+run_page_checks()
+# run_results_checks()
 try:
     browser.close()
 except:
