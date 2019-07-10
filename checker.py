@@ -39,8 +39,8 @@ def run_page_checks():
 def run_results_checks():
     """ Manages functional-checks for bib-pages. """
     try:
-        # beckwith = BeckwithResultsCheck()    # `David Beckwith papers`
-        # beckwith.run_check()
+        beckwith = BeckwithResultsCheck()    # `David Beckwith papers`
+        beckwith.run_check()
         yoken = YokenResultsCheck()          # `Mel B. Yoken collection`
         yoken.run_check()
         # john_hay = JohnHayCheck()     # `John Hay papers`

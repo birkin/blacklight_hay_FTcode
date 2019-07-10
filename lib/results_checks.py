@@ -31,7 +31,7 @@ class BeckwithResultsCheck:
         self.browser = Firefox(options=opts)
         self.query = 'f[format][]=Archives/Manuscripts&q=beckwith'
         self.first_item_target_callnumber = 'Ms.2010.010 Box 2'
-        self.second_item_target_callnumber = 'foo'
+        self.second_item_target_callnumber = 'Ms.2015.016 Box 1, DVD 2 - Andes, Cheri'
         # self.blast_limits()
 
     # def blast_limits(self):
@@ -40,13 +40,13 @@ class BeckwithResultsCheck:
     #     self.browser.get( url )
 
     def run_check(self):
-        """ Tests permutations of `Archives/Manuscripts` `beckwith` search results. """
+        """ Checks permutations of `Archives/Manuscripts` `beckwith` search results. """
 
         self.load_page()
 
-        ## first item info (annex-hay item available)
-        first_row = self.get_first_item()
-        ( location, call_number, status ) = self.get_first_item_info( first_row )
+        ## first item (annex-hay item available)
+        first_item_row = self.get_item( self.first_item_target_callnumber )
+        ( location, call_number, status ) = self.get_item_info( first_item_row )
 
         ## first item data checks
         assert location.text == 'ANNEX HAY', f'location.text, ```{location.text}```'
@@ -58,7 +58,19 @@ class BeckwithResultsCheck:
         link = status.find_element_by_tag_name( 'a' )
         assert 'easyrequest_hay/confirm' in link.get_attribute('href'), link.get_attribute('href')
 
-        ## TODO: second item?
+        ## second item (hay-manuscripts with use-in-library status)
+        second_item_row = self.get_item( self.second_item_target_callnumber )
+        ( location, call_number, status ) = self.get_item_info( second_item_row )
+
+        ## second item data checks
+        assert location.text == 'HAY MANUSCRIPTS', f'location.text, ```{location.text}```'
+        assert call_number.text == self.second_item_target_callnumber, f'call_number.text, ```{call_number.text}```'
+        assert 'USE IN LIBRARY' in status.text, f'status.text, ```{status.text}```'  # request-access link will also be here (odd but true)
+
+        ## second item link-check
+        assert 'request-access' in status.text, f'status.text, ```{status.text}```'
+        link = status.find_element_by_tag_name( 'a' )
+        assert 'brown.aeon.atlas-sys.com' in link.get_attribute('href'), link.get_attribute('href')
 
         self.browser.close()
         log.info( f'Result: test passed.' )  # won't get here unless all asserts pass
@@ -78,31 +90,27 @@ class BeckwithResultsCheck:
         time.sleep( 1 )  # lets js load up page
         return
 
-    def get_first_item( self ):
-        """ Grabs bibs, finds second row in first bib.
+    def get_item( self, target_callnumber ):
+        """ Grabs bibs, finds correct row and returns it.
             Called by run_check() """
         bibs = self.browser.find_elements_by_css_selector( 'div.document' )
         assert len(bibs) == 3, len(bibs)
-        first_bib = bibs[0]
-        check_format( first_bib )
-        rows = first_bib.find_elements_by_tag_name( 'tr' )
         target_row = 'init'
-        for row in rows:
-            if self.first_item_target_callnumber in row.text:
-                target_row = row
+        for bib in bibs:
+            rows = bib.find_elements_by_tag_name( 'tr' )
+            for row in rows:
+                if target_callnumber in row.text:
+                    target_row = row
+                    log.debug( f'target_row found, ```{target_row.text}```' )
+                    break
+            if target_row != 'init':
+                check_format( bib )
                 break
         log.info( f'target_row.text, ```{target_row.text}```' )
-        assert self.first_item_target_callnumber in target_row.text
+        assert target_callnumber in target_row.text
         return target_row
 
-    # def check_format( self, bib ):
-    #     """ Checks format.
-    #         Called by each item-getter. """
-    #     format = bib.find_elements_by_class_name( 'title-subheading' )[-1]  # initial non-format line may exist
-    #     assert format.text == 'Archives/Manuscripts', f'format.text, `{format.text}`'
-    #     return
-
-    def get_first_item_info( self, first_row ):
+    def get_item_info( self, first_row ):
         """ Parses item.
             Called by run_check() """
         cells = first_row.find_elements_by_tag_name( 'td' )
@@ -110,20 +118,6 @@ class BeckwithResultsCheck:
         call_number = cells[1]
         status = cells[2]
         return ( location, call_number, status )
-
-    # def get_second_item_info( self, second_item ):
-    #     """ Parses item.
-    #         Called by run_check() """
-    #     log.info( f'second_item.text, ```{second_item.text}```' )
-    #     location = second_item.find_element_by_class_name( 'location' )
-    #     assert location.text == 'ANNEX HAY', f'location.text, ```{location.text}```'
-    #     #
-    #     call_number = second_item.find_element_by_class_name( 'callnumber' )
-    #     assert call_number.text == 'Ms.2007.012 Box 8', f'call_number.text, ```{call_number.text}```'
-    #     #
-    #     status = second_item.find_element_by_class_name( 'status' )
-    #     assert status.text == 'AVAILABLE', f'status.text, ```{status.text}```'
-    #     return ( location, call_number, status )
 
     ## end class BeckwithResultsCheck
 
