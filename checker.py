@@ -9,7 +9,7 @@ import logging, pprint, sys, traceback
 
 import settings
 from lib import page_checks
-from lib.page_checks import YokenCheck, JohnHayCheck, GregorianCheck, BrownCheck
+from lib.page_checks import YokenCheck, JohnHayCheck, GregorianCheck, BrownCheck, MiscMicrofilmCheck
 from lib.results_checks import BeckwithResultsCheck, YokenResultsCheck, JohnHayResultsCheck, GregorianResultsCheck, BrownResultsCheck
 
 
@@ -32,6 +32,8 @@ def run_page_checks():
         gregorian.run_check()
         brown = BrownCheck()          # `John Nicholas Brown II papers`
         brown.run_check()
+        microfilm = MiscMicrofilmCheck()
+        microfilm.run_check()
     except Exception:
         log.exception( 'exception; traceback...' )
         # raise

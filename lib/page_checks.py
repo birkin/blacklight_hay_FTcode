@@ -479,3 +479,67 @@ Goal: Ensure a bib-format of `Archives/Manuscripts` -- with items that are `REST
         return ( location, call_number, status )
 
     ## end class BrownCheck
+
+
+class MiscMicrofilmCheck:
+
+    def __init__(self):
+        self.browser = Firefox(options=opts)
+        self.browser.implicitly_wait( settings.BROWSER_WAIT_SECONDS )
+        self.bib = 'b2734709'
+        self.first_item_id = 'item_159973284'
+
+    def run_check(self):
+        """ Checks that `HAY MICROFLM` items are not requestable. """
+
+        self.load_page()
+
+        ## format
+        format_element = self.browser.find_elements_by_class_name( 'blacklight-format' )[1]  # [0] is the word 'Format'
+        assert format_element.text == 'Archives/Manuscripts', f'format_element.text, ```{format_element.text}```'
+
+        ## first item info (hay-microfilm, no)
+        first_item = self.browser.find_element_by_id( self.first_item_id )
+        # log.info( f'first_item.text, ```{first_item.text}```' )
+        ( location, call_number, status ) = self.get_first_item_info( first_item )
+
+        ## first item empties test -- NO link should show
+        for class_type in [ 'scan', 'jcb_url', 'hay_aeon_url', 'ezb_volume_url', 'annexhay_easyrequest_url' ]:
+            request_link = first_item.find_element_by_class_name( class_type )
+            assert request_link.text == '', f'request_link.text, ```{request_link.text}```'
+
+        self.browser.close()
+        log.info( f'Result: test passed.' )  # won't get here unless all asserts pass
+
+        ## end def run_check()
+
+    def load_page( self ):
+        """ Hits url; returns browser object.
+            Called by run_check() """
+        aim = """
+
+-------
+Goal: Ensure a bib-format of `Archives/Manuscripts` -- with items that are `RESTRICTED` via callnumber -- cannot be requested.
+-------"""
+        log.info( aim )
+        url = f'{settings.ROOT_PAGE_URL}/{self.bib}?limit=false'
+        log.info( f'hitting url, ```{url}```' )
+        #
+        self.browser.get( url )
+        return
+
+    def get_first_item_info( self, first_item ):
+        """ Parses item.
+            Called by run_check() """
+        log.info( f'first_item.text, ```{first_item.text}```' )
+        location = first_item.find_element_by_class_name( 'location' )
+        assert location.text == 'HAY MICROFLM', f'location.text, ```{location.text}```'
+        #
+        call_number = first_item.find_element_by_class_name( 'callnumber' )
+        assert call_number.text == 'F5701 reel 2', f'call_number.text, ```{call_number.text}```'
+        #
+        status = first_item.find_element_by_class_name( 'status' )
+        assert status.text == 'USE IN LIBRARY', f'status.text, ```{status.text}```'
+        return ( location, call_number, status )
+
+    ## end class MiscMicrofilmCheck
