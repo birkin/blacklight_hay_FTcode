@@ -22,6 +22,7 @@ class BeckwithResultsCheck:
     def __init__(self):
         self.browser = Firefox(options=opts)
         self.query = 'f[format][]=Archives/Manuscripts&q=beckwith'
+        self.first_item_target_callnumber = 'Ms.2010.010 Box 2'
         # self.blast_limits()
 
     # def blast_limits(self):
@@ -38,29 +39,25 @@ class BeckwithResultsCheck:
 
         self.load_page()
 
-        # ## format
-        # format_element = self.browser.find_elements_by_class_name( 'blacklight-format' )[1]  # [0] is the word 'Format'
-        # assert format_element.text == 'Archives/Manuscripts', f'format_element.text, ```{format_element.text}```'
-
         ## first item info (annex-hay item available)
-        first_item = self.get_first_item()
-        ( location, call_number, status ) = self.get_first_item_info( first_item )
+        first_row = self.get_first_item()
+        ( location, call_number, status ) = self.get_first_item_info( first_row )
 
+        ## first item data checks
+        assert location.text == 'ANNEX HAY', f'location.text, ```{location.text}```'
+        assert call_number.text == 'Ms.2010.010 Box 2', f'call_number.text, ```{call_number.text}```'
+        assert 'AVAILABLE' in status.text, f'status.text, ```{status.text}```'  # request-access link will also be here (odd but true)
 
-        ## first item info link-check
+        ## first item link-check
         assert 'request-access' in status.text, f'status.text, ```{status.text}```'
+        link = status.find_element_by_tag_name( 'a' )
+        assert 'easyrequest_hay/confirm' in link.get_attribute('href'), link.get_attribute('href')
 
-        ## next: get link and test for proper _kind_ of link
 
 
         1/0
 
 
-
-        ## first item empties test -- NO link should show
-        for class_type in [ 'scan', 'jcb_url', 'hay_aeon_url', 'ezb_volume_url', 'annexhay_easyrequest_url' ]:
-            request_link = first_item.find_element_by_class_name( class_type )
-            assert request_link.text == '', f'request_link.text, ```{request_link.text}```'
 
         # ## second item info (regular annex-hay available item)
         # second_item = self.browser.find_element_by_id( 'item_140852803' )
@@ -90,7 +87,7 @@ class BeckwithResultsCheck:
         log.info( f'hitting url, ```{url}```' )
         #
         self.browser.get( url )
-        time.sleep( .5 )  # lets js load up page
+        time.sleep( 1 )  # lets js load up page
         return
 
     def get_first_item( self ):
@@ -99,26 +96,31 @@ class BeckwithResultsCheck:
         bibs = self.browser.find_elements_by_css_selector( 'div.document' )
         assert len(bibs) == 3, len(bibs)
         first_bib = bibs[0]
+        self.check_format( first_bib )
         rows = first_bib.find_elements_by_tag_name( 'tr' )
         target_row = 'init'
         for row in rows:
-            target_callnumber = 'Ms.2010.010 Box 2'
-            if target_callnumber in row.text:
+            if first_item_target_callnumber in row.text:
                 target_row = row
+                break
         log.info( f'target_row.text, ```{target_row.text}```' )
         assert target_callnumber in target_row.text
         return target_row
 
-    def get_first_item_info( self, first_item ):
+    def check_format( self, bib ):
+        """ Checks format.
+            Called by each item-getter. """
+        format = bib.find_elements_by_class_name( 'title-subheading' )[-1]  # initial non-format line may exist
+        assert format.text == 'Archives/Manuscripts', f'format.text, `{format.text}`'
+        return
+
+    def get_first_item_info( self, first_row ):
         """ Parses item.
             Called by run_check() """
-        cells = first_item.find_elements_by_tag_name( 'td' )
+        cells = first_row.find_elements_by_tag_name( 'td' )
         location = cells[0]
-        assert location.text == 'ANNEX HAY', f'location.text, ```{location.text}```'
         call_number = cells[1]
-        assert call_number.text == 'Ms.2010.010 Box 2', f'call_number.text, ```{call_number.text}```'
         status = cells[2]
-        assert 'AVAILABLE' in status.text, f'status.text, ```{status.text}```'  # request-access link will also be here (odd but true)
         return ( location, call_number, status )
 
     # def get_second_item_info( self, second_item ):
