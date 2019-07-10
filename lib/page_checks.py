@@ -24,7 +24,11 @@ def check_A():
     browser.implicitly_wait( settings.BROWSER_WAIT_SECONDS )
 
     ## load page
-    aim = """\n-------\nGoal: Ensure a format of `Archives/Manuscripts` with a location of `ANNEX HAY` shows the easyrequest_hay request url. """
+    aim = """
+
+-------
+Goal: Ensure a format of `Archives/Manuscripts` with a location of `ANNEX HAY` shows the easyrequest_hay request url.
+-------"""
     log.info( aim )
     bib = 'b5706110'
     url = f'{settings.ROOT_PAGE_URL}/{bib}'
@@ -110,8 +114,11 @@ class YokenCheck:
     def load_page( self ):
         """ Hits url; returns browser object.
             Called by run_check() """
-        aim = """\n-------\nGoal: Ensure a format of `Archives/Manuscripts` with a location of `HAY MANUSCRIPTS`
-shows the direct Aeon request url -- _if_ the status is `AVAILABLE`. """
+        aim = """
+
+-------
+Goal: Ensure a format of `Archives/Manuscripts` with a location of `HAY MANUSCRIPTS` shows the direct Aeon request url -- _if_ the status is `AVAILABLE`.
+-------"""
         log.info( aim )
         bib = 'b3589814'
         url = f'{settings.ROOT_PAGE_URL}/{bib}'
@@ -223,8 +230,11 @@ class JohnHayCheck:
     def load_page( self ):
         """ Hits url; returns browser object.
             Called by run_check() """
-        aim = """\n-------\nGoal: Ensure a bib-format of `Archives/Manuscripts` with items of varying locations
-shows the proper type of request url -- _if_ the status is `AVAILABLE`. """
+        aim = """
+
+-------
+Goal: Ensure a bib-format of `Archives/Manuscripts` with items of varying locations shows the proper type of request url -- _if_ the status is `AVAILABLE`.
+-------"""
         log.info( aim )
         url = f'{settings.ROOT_PAGE_URL}/{self.bib}?limit=false'
         log.info( f'hitting url, ```{url}```' )
@@ -327,7 +337,11 @@ class GregorianCheck:
     def load_page( self ):
         """ Hits url; returns browser object.
             Called by run_check() """
-        aim = """\n-------\nGoal: Ensure a bib-format of `Archives/Manuscripts` with items of `RESTRICTED` status cannot be requested. """
+        aim = """
+
+-------
+Goal: Ensure a bib-format of `Archives/Manuscripts` with items of `RESTRICTED` status cannot be requested.
+-------"""
         log.info( aim )
         bib = 'b4115486'
         url = f'{settings.ROOT_PAGE_URL}/{bib}'
@@ -424,7 +438,11 @@ class BrownCheck:
     def load_page( self ):
         """ Hits url; returns browser object.
             Called by run_check() """
-        aim = """\n-------\nGoal: Ensure a bib-format of `Archives/Manuscripts` -- with items that are `RESTRICTED` via callnumber -- cannot be requested. """
+        aim = """
+
+-------
+Goal: Ensure a bib-format of `Archives/Manuscripts` -- with items that are `RESTRICTED` via callnumber -- cannot be requested.
+-------"""
         log.info( aim )
         url = f'{settings.ROOT_PAGE_URL}/{self.bib}?limit=false'
         log.info( f'hitting url, ```{url}```' )

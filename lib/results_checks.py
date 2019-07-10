@@ -29,9 +29,10 @@ class BeckwithResultsCheck:
 
     def __init__(self):
         self.browser = Firefox(options=opts)
+        self.browser.implicitly_wait( settings.BROWSER_WAIT_SECONDS )
         self.query = 'f[format][]=Archives/Manuscripts&q=beckwith'
-        self.first_item_target_callnumber = 'Ms.2010.010 Box 2'
-        self.second_item_target_callnumber = 'Ms.2015.016 Box 1, DVD 2 - Andes, Cheri'
+        self.first_item_target_callnumber = 'Ms.2010.010 Box 2'  # annex-hay, available, yes
+        self.second_item_target_callnumber = 'Ms.2015.016 Box 1, DVD 2 - Andes, Cheri'  # hay-manuscripts, use-in-library, yes
         # self.blast_limits()
 
     def run_check(self):
@@ -39,7 +40,7 @@ class BeckwithResultsCheck:
 
         self.load_page()
 
-        ## first item (annex-hay item available)
+        ## first item (annex-hay, available, yes)
         first_item_row = self.get_item( self.first_item_target_callnumber )
         ( location, call_number, status ) = self.get_item_info( first_item_row )
 
@@ -53,7 +54,7 @@ class BeckwithResultsCheck:
         link = status.find_element_by_tag_name( 'a' )
         assert 'easyrequest_hay/confirm' in link.get_attribute('href'), link.get_attribute('href')
 
-        ## second item (hay-manuscripts with use-in-library status)
+        ## second item (hay-manuscripts, use-in-library, yes)
         second_item_row = self.get_item( self.second_item_target_callnumber )
         ( location, call_number, status ) = self.get_item_info( second_item_row )
 
@@ -75,14 +76,18 @@ class BeckwithResultsCheck:
     def load_page( self ):
         """ Hits url; returns browser object.
             Called by run_check() """
-        aim = """\n-------\nGoal: `ANNEX HAY` location items with status `AVAILABLE` will have an easyrequest-hay link,
-      & `HAY MANUSCRIPTS` location items with status `USE IN LIBRARY` will have an Aeon link. """
+        aim = """
+
+-------
+Goal:
+- annex-hay, available, yes, via easyrequest-hay link
+- hay-manuscripts, use-in-library, yes, via direct aeon link
+-------"""
         log.info( aim )
         url = f'{settings.ROOT_PAGE_URL}?{self.query}'
         log.info( f'hitting url, ```{url}```' )
         #
         self.browser.get( url )
-        self.browser.implicitly_wait(2)
         # time.sleep( 1 )  # lets js load up page
         return
 
@@ -122,7 +127,8 @@ class YokenResultsCheck:
 
     def __init__(self):
         self.browser = Firefox(options=opts)
-        self.query = 'f[format][]=Archives/Manuscripts&q=yoken'
+        self.browser.implicitly_wait( settings.BROWSER_WAIT_SECONDS )
+        self.query = 'f[format][]=Archives/Manuscripts&q=yoken'  # hay-manuscripts, available, yes
         self.first_item_target_callnumber = 'Ms.2011.038 Box 1'
 
     def run_check(self):
@@ -130,7 +136,7 @@ class YokenResultsCheck:
 
         self.load_page()
 
-        ## first item info (annex-hay item available)
+        ## first item info (hay-manuscripts, available, yes)
         first_row = self.get_first_item()
         ( location, call_number, status ) = self.get_first_item_info( first_row )
 
@@ -152,12 +158,16 @@ class YokenResultsCheck:
     def load_page( self ):
         """ Hits url; returns browser object.
             Called by run_check() """
-        aim = """\n-------\nGoal: `HAY MANUSCRIPTS` location items with status `AVAILABLE` will have an Aeon link. """
+        aim = """
+
+-------
+Goal:
+- hay-manuscripts, available, yes, via direct aeon link
+-------"""
         log.info( aim )
         url = f'{settings.ROOT_PAGE_URL}?{self.query}'
         log.info( f'hitting url, ```{url}```' )
         self.browser.get( url )
-        self.browser.implicitly_wait(2)
         return
 
     def get_first_item( self ):
@@ -193,6 +203,7 @@ class JohnHayResultsCheck:
 
     def __init__(self):
         self.browser = Firefox(options=opts)
+        self.browser.implicitly_wait( settings.BROWSER_WAIT_SECONDS )
         self.query = 'f[format][]=Archives/Manuscripts&q=John Hay Papers'
         self.first_item_target_callnumber = 'Ms.HAY Box 2'  # annex-hay, available, yes
         self.second_item_target_callnumber = 'Ms.HAY Box 4'  # annex-hay, due, no
@@ -263,14 +274,20 @@ class JohnHayResultsCheck:
     def load_page( self ):
         """ Hits url; returns browser object.
             Called by run_check() """
-        aim = """\n-------\nGoal: `ANNEX HAY` location items with status `AVAILABLE` will have an easyrequest-hay link,
-      & `HAY MANUSCRIPTS` location items with status `USE IN LIBRARY` will have an Aeon link. """
+        aim = """
+
+-------
+Goal:
+- annex-hay, available, yes, via easy-request-link
+- annex-hay, due, no
+- hay-microfilm, no
+- hay-john-hay, no
+-------"""
         log.info( aim )
         url = f'{settings.ROOT_PAGE_URL}?{self.query}'
         log.info( f'hitting url, ```{url}```' )
         #
         self.browser.get( url )
-        self.browser.implicitly_wait(2)
         # time.sleep( 1.66 )  # lets js load up page
         return
 
@@ -312,6 +329,7 @@ class GregorianResultsCheck:
 
     def __init__(self):
         self.browser = Firefox(options=opts)
+        self.browser.implicitly_wait( settings.BROWSER_WAIT_SECONDS )
         self.query = 'f[format][]=Archives/Manuscripts&q=Vartan Gregorian papers'
         self.first_item_target_callnumber = 'OF-1C-16 Box 2'  # annex-hay, restricted, no
         self.second_item_target_callnumber = 'OF-1C-16 Box 5'  # annex-hay, available, yes
@@ -373,15 +391,19 @@ class GregorianResultsCheck:
     def load_page( self ):
         """ Hits url; returns browser object.
             Called by run_check() """
-        aim = """\n-------\nGoal: `ANNEX HAY` location items with status `AVAILABLE` will have an easyrequest-hay link,
-      & `HAY MANUSCRIPTS` location items with status `USE IN LIBRARY` will have an Aeon link. """
+        aim = """
+
+-------
+Goal:
+- annex-hay, restricted, no
+- annex-hay, available, yes, via easyrequest-hay link
+- hay-archives, use-in-library, yes, via direct aeon link
+-------"""
         log.info( aim )
         url = f'{settings.ROOT_PAGE_URL}?{self.query}'
         log.info( f'hitting url, ```{url}```' )
         #
         self.browser.get( url )
-        self.browser.implicitly_wait(2)
-        # time.sleep( 1.66 )  # lets js load up page
         return
 
     def get_item( self, target_callnumber ):
@@ -422,6 +444,7 @@ class BrownResultsCheck:
 
     def __init__(self):
         self.browser = Firefox(options=opts)
+        self.browser.implicitly_wait( settings.BROWSER_WAIT_SECONDS )
         self.query = 'f[format][]=Archives/Manuscripts&q=John Nicholas Brown II papers'
         self.first_item_target_callnumber = 'Ms.2007.012 Box 10'  # annex-hay, available, yes
         self.second_item_target_callnumber = 'Ms.2007.012 Box 142 - RESTRICTED'  # annex-hay, available, but restricted by callnumber, no
@@ -474,15 +497,18 @@ class BrownResultsCheck:
     def load_page( self ):
         """ Hits url; returns browser object.
             Called by run_check() """
-        aim = """\n-------\nGoal: `ANNEX HAY` location items with status `AVAILABLE` will have an easyrequest-hay link,
-      & `HAY MANUSCRIPTS` location items with status `USE IN LIBRARY` will have an Aeon link. """
+        aim = """
+
+-------
+Goal:
+- annex-hay, available, yes, via easyrequest-hay link
+- annex-hay, available, but restricted by callnumber, no
+-------"""
         log.info( aim )
         url = f'{settings.ROOT_PAGE_URL}?{self.query}'
         log.info( f'hitting url, ```{url}```' )
         #
         self.browser.get( url )
-        self.browser.implicitly_wait(2)
-        # time.sleep( 1.66 )  # lets js load up page
         return
 
     def get_item( self, target_callnumber ):
