@@ -519,7 +519,7 @@ class MiscMicrofilmCheck:
         aim = """
 
 -------
-Goal: Ensure a bib-format of `Archives/Manuscripts` -- with items that are `RESTRICTED` via callnumber -- cannot be requested.
+Goal: Ensure a bib-format of `Archives/Manuscripts` -- with items that have a microfilm location -- cannot be requested.
 -------"""
         log.info( aim )
         url = f'{settings.ROOT_PAGE_URL}/{self.bib}?limit=false'
