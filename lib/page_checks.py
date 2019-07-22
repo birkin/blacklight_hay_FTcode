@@ -490,7 +490,7 @@ class MiscMicrofilmCheck:
         self.first_item_id = 'item_159973284'
 
     def run_check(self):
-        """ Checks that `HAY MICROFLM` items are not requestable. """
+        """ Checks that `HAY MICROFLM` items are requestable. """
 
         self.load_page()
 
@@ -503,10 +503,14 @@ class MiscMicrofilmCheck:
         # log.info( f'first_item.text, ```{first_item.text}```' )
         ( location, call_number, status ) = self.get_first_item_info( first_item )
 
-        ## first item empties test -- NO link should show
-        for class_type in [ 'scan', 'jcb_url', 'hay_aeon_url', 'ezb_volume_url', 'annexhay_easyrequest_url' ]:
+        ## first item empties test
+        for class_type in [ 'scan', 'jcb_url', 'ezb_volume_url', 'annexhay_easyrequest_url' ]:
             request_link = first_item.find_element_by_class_name( class_type )
             assert request_link.text == '', f'request_link.text, ```{request_link.text}```'
+
+        ## first item request-link test -- direct Aeon link SHOULD show
+        request_link = first_item.find_element_by_class_name( 'hay_aeon_url' )
+        assert request_link.text.strip() == 'request-access', f'request_link.text, ```{request_link.text}```'
 
         self.browser.close()
         log.info( f'Result: test passed.' )  # won't get here unless all asserts pass
@@ -519,7 +523,7 @@ class MiscMicrofilmCheck:
         aim = """
 
 -------
-Goal: Ensure a bib-format of `Archives/Manuscripts` -- with items that have a microfilm location -- cannot be requested.
+Goal: Ensure a bib-format of `Archives/Manuscripts` -- with items that have a microfilm location -- _can_ be requested.
 -------"""
         log.info( aim )
         url = f'{settings.ROOT_PAGE_URL}/{self.bib}?limit=false'
