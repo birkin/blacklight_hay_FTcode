@@ -13,8 +13,8 @@ log = logging.getLogger(__name__)
 
 
 opts = Options()
-# opts.set_headless()
-# assert opts.headless  # Operating in headless mode
+opts.set_headless()
+assert opts.headless  # Operating in headless mode
 
 
 def check_A():

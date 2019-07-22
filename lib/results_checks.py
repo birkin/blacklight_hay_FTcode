@@ -13,8 +13,8 @@ log = logging.getLogger(__name__)
 
 
 opts = Options()
-# opts.set_headless()
-# assert opts.headless  # Operating in headless mode
+opts.set_headless()
+assert opts.headless  # Operating in headless mode
 
 
 def check_format( bib ):
@@ -254,9 +254,6 @@ class JohnHayResultsCheck:
         ## third item link-check
         assert 'request-access' in status.text, f'status.text, ```{status.text}```'
 
-
-
-
         ## fourth item (hay-john-hay, yes)
         fourth_item_row = self.get_item( self.fourth_item_target_callnumber )
         ( location, call_number, status ) = self.get_item_info( fourth_item_row )
@@ -268,9 +265,6 @@ class JohnHayResultsCheck:
 
         ## fourth item link-check
         assert 'request-access' in status.text, f'status.text, ```{status.text}```'
-
-
-
 
         self.browser.close()
         log.info( f'Result: test passed.' )  # won't get here unless all asserts pass
@@ -286,8 +280,8 @@ class JohnHayResultsCheck:
 Goal:
 - annex-hay, available, yes, via easy-request-link
 - annex-hay, due, no
-- hay-microfilm, no
-- hay-john-hay, no
+- hay-microfilm, yes, via direct aeon link
+- hay-john-hay, yes, via direct aeon link
 -------"""
         log.info( aim )
         url = f'{settings.ROOT_PAGE_URL}?{self.query}'
