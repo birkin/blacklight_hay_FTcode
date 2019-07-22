@@ -208,7 +208,7 @@ class JohnHayResultsCheck:
         self.first_item_target_callnumber = 'Ms.HAY Box 2'  # annex-hay, available, yes
         self.second_item_target_callnumber = 'Ms.HAY Box 4'  # annex-hay, due, no
         self.third_item_target_callnumber = 'F5701 reel 2'  # hay-microfilm, yes
-        self.fourth_item_target_callnumber = '1-SIZE E664.H41 A3 1997ms v.2'  # hay-john-hay, no
+        self.fourth_item_target_callnumber = '1-SIZE E664.H41 A3 1997ms v.2'  # hay-john-hay, yes
         # self.blast_limits()
 
     def run_check(self):
@@ -257,7 +257,7 @@ class JohnHayResultsCheck:
 
 
 
-        ## fourth item (hay-john-hay, no)
+        ## fourth item (hay-john-hay, yes)
         fourth_item_row = self.get_item( self.fourth_item_target_callnumber )
         ( location, call_number, status ) = self.get_item_info( fourth_item_row )
 
@@ -267,7 +267,7 @@ class JohnHayResultsCheck:
         assert 'USE IN LIBRARY' in status.text, f'status.text, ```{status.text}```'  # request-access link will also be here (odd but true)
 
         ## fourth item link-check
-        assert 'request-access' not in status.text, f'status.text, ```{status.text}```'
+        assert 'request-access' in status.text, f'status.text, ```{status.text}```'
 
 
 
