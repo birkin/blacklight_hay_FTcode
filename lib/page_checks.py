@@ -498,7 +498,7 @@ class MiscMicrofilmCheck:
         format_element = self.browser.find_elements_by_class_name( 'blacklight-format' )[1]  # [0] is the word 'Format'
         assert format_element.text == 'Archives/Manuscripts', f'format_element.text, ```{format_element.text}```'
 
-        ## first item info (hay-microfilm, no)
+        ## first item info (hay-microfilm, yes)
         first_item = self.browser.find_element_by_id( self.first_item_id )
         # log.info( f'first_item.text, ```{first_item.text}```' )
         ( location, call_number, status ) = self.get_first_item_info( first_item )
